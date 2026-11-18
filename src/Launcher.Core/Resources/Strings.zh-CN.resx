@@ -666,6 +666,9 @@
   <data name="Text_11d3f9b625c9" xml:space="preserve">
     <value>已准备好采集新加载的区域。</value>
   </data>
+  <data name="Text_11d4bf8985f6" xml:space="preserve">
+    <value>装备的宠物会拾取所选通货，可按角色设置过滤规则，并可随时暂停。</value>
+  </data>
   <data name="Text_11e940a84add" xml:space="preserve">
     <value>关闭游戏；服务器保持运行</value>
   </data>
@@ -797,6 +800,9 @@
   </data>
   <data name="Text_15cf2239e4e8" xml:space="preserve">
     <value>安装 LocalExile</value>
+  </data>
+  <data name="Text_15d99b7ac4b9" xml:space="preserve">
+    <value>所有职业均可启用的原生 20 格扩展背包。</value>
   </data>
   <data name="Text_15e11dada9d7" xml:space="preserve">
     <value>{0} 不是 Waypoint 能使用的模组 ID</value>
@@ -4167,6 +4173,9 @@
   <data name="Text_7449e55272e4" xml:space="preserve">
     <value>工艺与交易</value>
   </data>
+  <data name="Text_748f3ab24141" xml:space="preserve">
+    <value>宠物拾取</value>
+  </data>
   <data name="Text_74a883a037bc" xml:space="preserve">
     <value>设置</value>
   </data>
@@ -6668,6 +6677,9 @@
   </data>
   <data name="Text_ba89783a339f" xml:space="preserve">
     <value>选择账号</value>
+  </data>
+  <data name="Text_ba9068ab94ec" xml:space="preserve">
+    <value>额外背包</value>
   </data>
   <data name="Text_baaddf70fb5d" xml:space="preserve">
     <value>类型</value>

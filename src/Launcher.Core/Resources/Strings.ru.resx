@@ -666,6 +666,9 @@
   <data name="Text_11d3f9b625c9" xml:space="preserve">
     <value>Готово к записи новых загружаемых областей.</value>
   </data>
+  <data name="Text_11d4bf8985f6" xml:space="preserve">
+    <value>Призванные питомцы собирают выбранную валюту. Фильтры настраиваются для каждого персонажа, сбор можно сразу приостановить.</value>
+  </data>
   <data name="Text_11e940a84add" xml:space="preserve">
     <value>Закрывает игру; серверы продолжают работать</value>
   </data>
@@ -797,6 +800,9 @@
   </data>
   <data name="Text_15cf2239e4e8" xml:space="preserve">
     <value>Настройка LocalExile</value>
+  </data>
+  <data name="Text_15d99b7ac4b9" xml:space="preserve">
+    <value>Дополнительный встроенный рюкзак на 20 ячеек для любого класса персонажа.</value>
   </data>
   <data name="Text_15e11dada9d7" xml:space="preserve">
     <value>{0} — не тот идентификатор мода, который Waypoint может использовать</value>
@@ -4167,6 +4173,9 @@
   <data name="Text_7449e55272e4" xml:space="preserve">
     <value>Ремесло и торговля</value>
   </data>
+  <data name="Text_748f3ab24141" xml:space="preserve">
+    <value>Сбор добычи питомцем</value>
+  </data>
   <data xml:space="preserve" name="Text_74a883a037bc">
     <value>Настройки</value>
   </data>
@@ -6668,6 +6677,9 @@
   </data>
   <data name="Text_ba89783a339f" xml:space="preserve">
     <value>Выберите аккаунт</value>
+  </data>
+  <data name="Text_ba9068ab94ec" xml:space="preserve">
+    <value>Дополнительный рюкзак</value>
   </data>
   <data name="Text_baaddf70fb5d" xml:space="preserve">
     <value>Тип</value>

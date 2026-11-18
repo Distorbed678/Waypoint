@@ -666,6 +666,9 @@
   <data name="Text_11d3f9b625c9" xml:space="preserve">
     <value>Ready to capture newly loaded areas.</value>
   </data>
+  <data name="Text_11d4bf8985f6" xml:space="preserve">
+    <value>Worn pets collect selected currency with per-character filters and an immediate pause switch.</value>
+  </data>
   <data name="Text_11e940a84add" xml:space="preserve">
     <value>Closes the game; the servers keep running</value>
   </data>
@@ -797,6 +800,9 @@
   </data>
   <data name="Text_15cf2239e4e8" xml:space="preserve">
     <value>Set up LocalExile</value>
+  </data>
+  <data name="Text_15d99b7ac4b9" xml:space="preserve">
+    <value>An optional native 20-slot extra backpack for every character class.</value>
   </data>
   <data name="Text_15e11dada9d7" xml:space="preserve">
     <value>{0} is not a mod id Waypoint can use</value>
@@ -4167,6 +4173,9 @@ Switching to it builds and runs that code on this computer with your rights, liv
   <data name="Text_7449e55272e4" xml:space="preserve">
     <value>Crafting and trade</value>
   </data>
+  <data name="Text_748f3ab24141" xml:space="preserve">
+    <value>Pet Loot</value>
+  </data>
   <data xml:space="preserve" name="Text_74a883a037bc">
     <value>Settings</value>
   </data>
@@ -6668,6 +6677,9 @@ Owned servers will stop. Automatic backup is {2}. Source, client and login keys 
   </data>
   <data name="Text_ba89783a339f" xml:space="preserve">
     <value>Select an account</value>
+  </data>
+  <data name="Text_ba9068ab94ec" xml:space="preserve">
+    <value>Extra Backpack</value>
   </data>
   <data name="Text_baaddf70fb5d" xml:space="preserve">
     <value>Type</value>
