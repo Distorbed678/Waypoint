@@ -1414,6 +1414,10 @@ Advanced mode), the **Diagnostic report** button on an operation's failure dialo
 
 ### Tools: the item crafter
 
+The interface follows the selected language. With the [local Chinese item catalog](localization.md#importing-simplified-chinese-item-data),
+Simplified Chinese also displays and searches the client's item names, modifiers, and item previews. The item the Gateway
+receives uses the same IDs and values in any language.
+
 **Open item crafter** opens its window (one at a time; the button brings it forward): a window of its own in the
 taskbar, with Minimize and Maximize, not kept in front of Waypoint's. It makes any item the server can
 write and gives it to the character in game.
