@@ -1544,6 +1544,7 @@ the other leagues. The dev host stays running afterwards (it shares the save dat
 they want the game and every server stopped, are reviewed in their dialog, are backed up first, and are refused when the
 account changed since the list was read ([account-management.md](account-management.md)). A database whose layout the
 adapter does not know can be browsed but not changed.
+When a monitored server or the client stops, Waypoint checks the current workspace again before enabling account edits.
 
 ## Code
 
