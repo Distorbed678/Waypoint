@@ -1511,6 +1511,9 @@
   <data name="Text_28c09aa06d80" xml:space="preserve">
     <value>该账号的角色数量已达上限</value>
   </data>
+  <data name="Text_28c9a44bcbb7" xml:space="preserve">
+    <value>不做任何更改。如果此客户端与你平时玩的游戏共用设置，你需要自行在游戏中设置“连线模式”（Networking Mode）。</value>
+  </data>
   <data name="Text_28fd171b0b6b" xml:space="preserve">
     <value>下次再询问</value>
   </data>
@@ -2416,6 +2419,9 @@
   <data name="Text_4190c0c7ec72" xml:space="preserve">
     <value>打开文件</value>
   </data>
+  <data name="Text_41945b96ff92" xml:space="preserve">
+    <value>live.ps1 -NoClient：重新生成并重启 Patch、Auth 和 Gateway（拉取更新或修改服务器代码后；模块和模组会自动重载）。正在运行的客户端保持打开。</value>
+  </data>
   <data name="Text_419911a932d1" xml:space="preserve">
     <value>所选源码副本：</value>
   </data>
@@ -2469,6 +2475,9 @@
   </data>
   <data name="Text_43580afd3423" xml:space="preserve">
     <value>将物品保存在已保存列表中，以便之后再回来编辑</value>
+  </data>
+  <data name="Text_4361ebd3a097" xml:space="preserve">
+    <value>连线模式为自动（本地使用同步模式）</value>
   </data>
   <data name="Text_436e61016e26" xml:space="preserve">
     <value>开始游戏</value>
@@ -3568,6 +3577,9 @@
   <data name="Text_6300ef800bb8" xml:space="preserve">
     <value>从不</value>
   </data>
+  <data name="Text_6339e6c8c5a1" xml:space="preserve">
+    <value>连线模式为同步模式</value>
+  </data>
   <data name="Text_635484c1543e" xml:space="preserve">
     <value>重新加载游戏数据覆盖</value>
   </data>
@@ -4050,6 +4062,9 @@
   <data name="Text_7168faaaea2a" xml:space="preserve">
     <value>正常停止此源码副本的服务器。</value>
   </data>
+  <data name="Text_717bbef0fc33" xml:space="preserve">
+    <value>一切就绪。在 Waypoint 中点击“开始游戏”即可启动游戏。使用你的账号登录：将账号名填入“电邮”（Email）字段。</value>
+  </data>
   <data name="Text_718870a89c04" xml:space="preserve">
     <value>选择另一个 LocalExile 服务器源码副本；启动器会以它重新启动</value>
   </data>
@@ -4190,6 +4205,9 @@
   </data>
   <data name="Text_76087b2f89df" xml:space="preserve">
     <value>获取最新更改？</value>
+  </data>
+  <data name="Text_762be0980f1c" xml:space="preserve">
+    <value>LocalExile 会在 {0} 中使用自己的设置：以你平时设置的副本为起点，不含你的登录信息，并将连线模式设为同步模式。你平时游戏的文件不会更改。</value>
   </data>
   <data name="Text_76409ed15c76" xml:space="preserve">
     <value>（无回复）</value>
@@ -5078,6 +5096,9 @@
   </data>
   <data name="Text_902bf1204f8a" xml:space="preserve">
     <value>跳过构建</value>
+  </data>
+  <data name="Text_902e41b3df55" xml:space="preserve">
+    <value>修改服务器代码后需要重启服务器；模块和模组会自动重载到运行中的 Gateway。</value>
   </data>
   <data name="Text_9045b1ddb963" xml:space="preserve">
     <value>新账号名</value>
@@ -6681,6 +6702,9 @@
   <data name="Text_bbb7b7a9d1cb" xml:space="preserve">
     <value>正在启动游戏</value>
   </data>
+  <data name="Text_bbdc5622633e" xml:space="preserve">
+    <value>一切就绪。在 Waypoint 中点击“开始游戏”即可启动服务器和游戏。</value>
+  </data>
   <data name="Text_bbe8574175ab" xml:space="preserve">
     <value>正在停止…</value>
   </data>
@@ -6719,6 +6743,9 @@
   </data>
   <data name="Text_bd12187abc3e" xml:space="preserve">
     <value>稍后删除旧的那份</value>
+  </data>
+  <data name="Text_bd18dfc2873d" xml:space="preserve">
+    <value>Esc → 选项 → 游戏 → 连线模式 → 同步模式（Options → Game → Networking Mode → Lockstep），然后退出到角色选择界面，再次点击“开始游戏”</value>
   </data>
   <data name="Text_bd19f1c3f750" xml:space="preserve">
     <value>游戏设置配置文件</value>
@@ -8676,6 +8703,9 @@ Gateway 最近报告的事件。打开 Gateway 输出查看详情。</value>
   </data>
   <data name="Text_f55c33b0abbd" xml:space="preserve">
     <value>按角色创建配置显示赛季旗帜与模式选项。</value>
+  </data>
+  <data name="Text_f572aabe9d39" xml:space="preserve">
+    <value>连线模式为 {0}：服务器支持，但推荐使用同步模式</value>
   </data>
   <data name="Text_f57fa4ab0ce7" xml:space="preserve">
     <value>文件夹和工具</value>
