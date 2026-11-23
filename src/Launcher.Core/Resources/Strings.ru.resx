@@ -1511,6 +1511,9 @@
   <data name="Text_28c09aa06d80" xml:space="preserve">
     <value>на аккаунте уже максимальное число персонажей</value>
   </data>
+  <data name="Text_28c9a44bcbb7" xml:space="preserve">
+    <value>Ничего не меняется. Если этот клиент использует настройки вашей обычной игры, вы выбираете «Режим работы сети» (Networking Mode) в игре сами.</value>
+  </data>
   <data name="Text_28fd171b0b6b" xml:space="preserve">
     <value>Спросить снова в следующий раз</value>
   </data>
@@ -2416,6 +2419,9 @@
   <data name="Text_4190c0c7ec72" xml:space="preserve">
     <value>Открыть файл</value>
   </data>
+  <data name="Text_41945b96ff92" xml:space="preserve">
+    <value>live.ps1 -NoClient: пересобирает и перезапускает Patch, Auth и Gateway (после обновления или правок серверов; модули и моды перезагружаются сами). Запущенный клиент остаётся.</value>
+  </data>
   <data xml:space="preserve" name="Text_419911a932d1">
     <value>Выбранный репозиторий: </value>
   </data>
@@ -2469,6 +2475,9 @@
   </data>
   <data name="Text_43580afd3423" xml:space="preserve">
     <value>Сохранить предмет в списке, чтобы вернуться к нему позже</value>
+  </data>
+  <data name="Text_4361ebd3a097" xml:space="preserve">
+    <value>режим работы сети «Авто» («Синхронизация» на localhost)</value>
   </data>
   <data xml:space="preserve" name="Text_436e61016e26">
     <value>Играть</value>
@@ -3568,6 +3577,9 @@
   <data name="Text_6300ef800bb8" xml:space="preserve">
     <value>Никогда</value>
   </data>
+  <data name="Text_6339e6c8c5a1" xml:space="preserve">
+    <value>режим работы сети «Синхронизация»</value>
+  </data>
   <data xml:space="preserve" name="Text_635484c1543e">
     <value>Обновить игровые данные</value>
   </data>
@@ -4050,6 +4062,9 @@
   <data xml:space="preserve" name="Text_7168faaaea2a">
     <value>Корректно остановить серверы этой установки.</value>
   </data>
+  <data name="Text_717bbef0fc33" xml:space="preserve">
+    <value>Всё готово. Нажмите «Играть» в Waypoint, чтобы запустить игру. Войдите с учётной записью: её имя вводится в поле «Эл. почта» (Email).</value>
+  </data>
   <data name="Text_718870a89c04" xml:space="preserve">
     <value>Выбрать другой репозиторий сервера LocalExile; Waypoint перезапустится с ним</value>
   </data>
@@ -4190,6 +4205,9 @@
   </data>
   <data name="Text_76087b2f89df" xml:space="preserve">
     <value>Получать последние изменения?</value>
+  </data>
+  <data name="Text_762be0980f1c" xml:space="preserve">
+    <value>LocalExile получит собственные в {0}: это копия ваших обычных настроек без данных для входа, с режимом работы сети «Синхронизация». Файлы вашей обычной игры не изменятся.</value>
   </data>
   <data name="Text_76409ed15c76" xml:space="preserve">
     <value>(нет ответа)</value>
@@ -5078,6 +5096,9 @@
   </data>
   <data name="Text_902bf1204f8a" xml:space="preserve">
     <value>Без сборки</value>
+  </data>
+  <data name="Text_902e41b3df55" xml:space="preserve">
+    <value>После правок кода серверы перезапускаются; модули и моды сами перезагружаются в работающий Gateway.</value>
   </data>
   <data name="Text_9045b1ddb963" xml:space="preserve">
     <value>Новое имя аккаунта</value>
@@ -6681,6 +6702,9 @@
   <data name="Text_bbb7b7a9d1cb" xml:space="preserve">
     <value>Запуск игры</value>
   </data>
+  <data name="Text_bbdc5622633e" xml:space="preserve">
+    <value>Всё на месте. Нажмите «Играть» в Waypoint, чтобы запустить серверы и игру.</value>
+  </data>
   <data name="Text_bbe8574175ab" xml:space="preserve">
     <value>Остановка…</value>
   </data>
@@ -6719,6 +6743,9 @@
   </data>
   <data name="Text_bd12187abc3e" xml:space="preserve">
     <value>Удалить старую позже</value>
+  </data>
+  <data name="Text_bd18dfc2873d" xml:space="preserve">
+    <value>Esc → Настройки → Игра → Режим работы сети → Синхронизация (Options → Game → Networking Mode → Lockstep), затем выйдите на экран персонажей и снова нажмите «Играть»</value>
   </data>
   <data name="Text_bd19f1c3f750" xml:space="preserve">
     <value>Профиль настроек игры</value>
@@ -8676,6 +8703,9 @@
   </data>
   <data name="Text_f55c33b0abbd" xml:space="preserve">
     <value>Флаги лиг и режимы, определённые для создания персонажа.</value>
+  </data>
+  <data name="Text_f572aabe9d39" xml:space="preserve">
+    <value>режим работы сети {0}: обслуживается, но предпочтителен «Синхронизация»</value>
   </data>
   <data name="Text_f57fa4ab0ce7" xml:space="preserve">
     <value>Папки и программы</value>

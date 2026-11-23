@@ -1511,6 +1511,9 @@ Change location above to choose somewhere else.</value>
   <data name="Text_28c09aa06d80" xml:space="preserve">
     <value>the account has the most characters it can have</value>
   </data>
+  <data name="Text_28c9a44bcbb7" xml:space="preserve">
+    <value>Nothing changes. If this client shares its settings with your normal game, you set Networking Mode in the game yourself.</value>
+  </data>
   <data name="Text_28fd171b0b6b" xml:space="preserve">
     <value>Ask again next time</value>
   </data>
@@ -2416,6 +2419,9 @@ This checkout has modified tracked files.</value>
   <data name="Text_4190c0c7ec72" xml:space="preserve">
     <value>Open file</value>
   </data>
+  <data name="Text_41945b96ff92" xml:space="preserve">
+    <value>live.ps1 -NoClient: rebuilds and restarts Patch, Auth and Gateway (after a pull or server edits; modules and mods reload by themselves). A running client stays.</value>
+  </data>
   <data xml:space="preserve" name="Text_419911a932d1">
     <value>Selected checkout: </value>
   </data>
@@ -2469,6 +2475,9 @@ This checkout has modified tracked files.</value>
   </data>
   <data name="Text_43580afd3423" xml:space="preserve">
     <value>Keep the item in the saved list to come back to it</value>
+  </data>
+  <data name="Text_4361ebd3a097" xml:space="preserve">
+    <value>network mode auto (Lockstep on localhost)</value>
   </data>
   <data xml:space="preserve" name="Text_436e61016e26">
     <value>Play</value>
@@ -3568,6 +3577,9 @@ Search limits reached; other checkouts may exist. Browse to any location.</value
   <data name="Text_6300ef800bb8" xml:space="preserve">
     <value>Never</value>
   </data>
+  <data name="Text_6339e6c8c5a1" xml:space="preserve">
+    <value>network mode Lockstep</value>
+  </data>
   <data xml:space="preserve" name="Text_635484c1543e">
     <value>Reload game-data overrides</value>
   </data>
@@ -4050,6 +4062,9 @@ Switching to it builds and runs that code on this computer with your rights, liv
   <data xml:space="preserve" name="Text_7168faaaea2a">
     <value>Gracefully stop servers for this checkout.</value>
   </data>
+  <data name="Text_717bbef0fc33" xml:space="preserve">
+    <value>Everything is in place. Press Play in Waypoint to start the game. Log in with your account: its name goes in the Email field.</value>
+  </data>
   <data name="Text_718870a89c04" xml:space="preserve">
     <value>Pick another LocalExile server checkout; the launcher starts again on it</value>
   </data>
@@ -4190,6 +4205,9 @@ Switching to it builds and runs that code on this computer with your rights, liv
   </data>
   <data name="Text_76087b2f89df" xml:space="preserve">
     <value>Get the newest changes?</value>
+  </data>
+  <data name="Text_762be0980f1c" xml:space="preserve">
+    <value>LocalExile gets its own in {0}, starting from a copy of your normal settings without your login, with Networking Mode set to Lockstep. Your normal game's files are not changed.</value>
   </data>
   <data name="Text_76409ed15c76" xml:space="preserve">
     <value>(no reply)</value>
@@ -5078,6 +5096,9 @@ Switching to it builds and runs that code on this computer with your rights, liv
   </data>
   <data name="Text_902bf1204f8a" xml:space="preserve">
     <value>Skip build</value>
+  </data>
+  <data name="Text_902e41b3df55" xml:space="preserve">
+    <value>Servers restart on code edits; modules and mods reload into the running Gateway by themselves.</value>
   </data>
   <data name="Text_9045b1ddb963" xml:space="preserve">
     <value>New account name</value>
@@ -6681,6 +6702,9 @@ Owned servers will stop. Automatic backup is {2}. Source, client and login keys 
   <data name="Text_bbb7b7a9d1cb" xml:space="preserve">
     <value>Starting the game</value>
   </data>
+  <data name="Text_bbdc5622633e" xml:space="preserve">
+    <value>Everything is in place. Press Play in Waypoint to start the servers and the game.</value>
+  </data>
   <data name="Text_bbe8574175ab" xml:space="preserve">
     <value>Stopping…</value>
   </data>
@@ -6719,6 +6743,9 @@ Owned servers will stop. Automatic backup is {2}. Source, client and login keys 
   </data>
   <data name="Text_bd12187abc3e" xml:space="preserve">
     <value>Remove the old one later</value>
+  </data>
+  <data name="Text_bd18dfc2873d" xml:space="preserve">
+    <value>Esc → Options → Game → Networking Mode → Lockstep, then log out to the character screen and Play again</value>
   </data>
   <data name="Text_bd19f1c3f750" xml:space="preserve">
     <value>Game settings profile</value>
@@ -8676,6 +8703,9 @@ Mods at backup: </value>
   </data>
   <data name="Text_f55c33b0abbd" xml:space="preserve">
     <value>League flags and mode options as declared for character creation.</value>
+  </data>
+  <data name="Text_f572aabe9d39" xml:space="preserve">
+    <value>network mode {0}: served, but Lockstep is preferred</value>
   </data>
   <data name="Text_f57fa4ab0ce7" xml:space="preserve">
     <value>Folders and tools</value>
