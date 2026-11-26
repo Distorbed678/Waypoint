@@ -184,6 +184,7 @@ static class Program
         // with no ~/.local/share would never remember its checkout.
         _ = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData, Environment.SpecialFolderOption.Create);
         UserDotnet();
+        Tray.Ask();
         if (args.Length > 0 && Directory.Exists(args[0])) Checkout = Path.GetFullPath(args[0]);
         if (args.Length >= 3 && args[1] == "--render") return Render(args[2], args.Length > 3 ? args[3] : null, args.Length > 4 ? int.Parse(args[4], System.Globalization.CultureInfo.InvariantCulture) : 3);
         return AppBuilder.Configure<App>().UsePlatformDetect().WithInterFont().LogToTrace().StartWithClassicDesktopLifetime(args);
@@ -198,8 +199,11 @@ static class Program
     static void UserDotnet()
     {
         string dotnet = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".dotnet");
-        if (!File.Exists(Path.Combine(dotnet, "dotnet"))) return;
-        if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DOTNET_ROOT"))) Environment.SetEnvironmentVariable("DOTNET_ROOT", dotnet);
+        // The runtime the tools were installed with: the user's own SDK only when no other dotnet is on PATH, so that a
+        // system-wide .NET stays the one they use.
+        if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DOTNET_ROOT")) && File.Exists(Path.Combine(dotnet, "dotnet"))
+            && Platform.OnPath("dotnet") is null)
+            Environment.SetEnvironmentVariable("DOTNET_ROOT", dotnet);
         var path = (Environment.GetEnvironmentVariable("PATH") ?? "").Split(':', StringSplitOptions.RemoveEmptyEntries).ToList();
         foreach (string folder in new[] { dotnet, Path.Combine(dotnet, "tools") })
             if (Directory.Exists(folder) && !path.Contains(folder)) path.Add(folder);

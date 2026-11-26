@@ -37,11 +37,16 @@ sealed class MapCanvas : Control
         Cursor = Arrow;
         RenderOptions.SetBitmapInterpolationMode(this, BitmapInterpolationMode.None);
         PropertyChanged += (_, e) => { if (e.Property == BoundsProperty) Fit(); };
+        // Another scheme: the walkability is drawn again in its colours.
+        void Repaint() => Avalonia.Threading.Dispatcher.UIThread.Post(() => { if (_map is { } map) SetMap(map, keepView: true); else InvalidateVisual(); });
+        AttachedToVisualTree += (_, _) => AppTheme.Changed += Repaint;
+        DetachedFromVisualTree += (_, _) => AppTheme.Changed -= Repaint;
     }
 
-    internal void SetMap(MapData map)
+    internal void SetMap(MapData map, bool keepView = false)
     {
-        _map = map; Highlight = null; SelectedMarker = null;
+        if (!keepView) { Highlight = null; SelectedMarker = null; }
+        _map = map;
         RefreshMarkers();
         var open = Colour("Shell.Good");
         var blocked = Colour("Shell.Panel");
@@ -60,7 +65,7 @@ sealed class MapCanvas : Control
                 Marshal.Copy(row, 0, frame.Address + y * frame.RowBytes, row.Length);
             }
         }
-        Fit();
+        if (keepView) InvalidateVisual(); else Fit();
     }
 
     static Color Colour(string key) => AppTheme.Brush(key) is ISolidColorBrush brush ? brush.Color : Colors.Gray;

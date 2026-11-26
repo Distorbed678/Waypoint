@@ -9,9 +9,6 @@ public static class LauncherFile
     public const string ExeName = "Waypoint.exe";
     public const string AppImageName = "Waypoint-x86_64.AppImage";
 
-    /// <summary>The release's file for this kind of system.</summary>
-    public static string AssetName(bool linux) => linux ? AppImageName : ExeName;
-
     /// <summary>
     /// The file an update replaces, or null when this Waypoint is not one a release published (a build from source,
     /// <c>dotnet run</c>). On Windows the running single-file <c>Waypoint.exe</c>. On Linux the AppImage the AppImage runtime

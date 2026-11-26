@@ -36,13 +36,13 @@ static class Updates
         Environment.ProcessPath is { } path && Path.GetFileName(path).Equals(ExeName, StringComparison.OrdinalIgnoreCase) ? path : null;
 
     /// <summary>The release's file this system's Waypoint is.</summary>
-    static string AssetName => ExeName;
+    const string AssetName = ExeName;
 #else
     /// <summary>The running AppImage when this is the published one (`dotnet run` and a build from source are not).</summary>
     public static string? RunningExe => LauncherFile.Running();
 
     /// <summary>The release's file this system's Waypoint is.</summary>
-    static string AssetName => LauncherFile.AppImageName;
+    const string AssetName = LauncherFile.AppImageName;
 #endif
 
     /// <summary>"v1.2.3", "1.2.3", "1.2.3-dev+abc": the numeric part, three components; null for anything else.</summary>
@@ -154,8 +154,9 @@ static class Updates
 #if WINDOWS
         try { File.Delete(exe + ".old"); }
 #else
-        // Nothing is set aside on Linux; a download an earlier update left unfinished is.
-        try { File.Delete(exe + ".new"); }
+        // Nothing is set aside on Linux; a download an earlier update left unfinished is, once it is old enough that no
+        // other Waypoint can still be writing it.
+        try { if (File.Exists(exe + ".new") && DateTime.UtcNow - File.GetLastWriteTimeUtc(exe + ".new") > TimeSpan.FromHours(1)) File.Delete(exe + ".new"); }
 #endif
         catch (Exception e) when (e is IOException or UnauthorizedAccessException) { }
     }

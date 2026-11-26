@@ -9,8 +9,8 @@ public class LauncherFileTests
     [Fact]
     public void EachSystemHasItsReleaseFile()
     {
-        Assert.Equal("Waypoint.exe", LauncherFile.AssetName(linux: false));
-        Assert.Equal("Waypoint-x86_64.AppImage", LauncherFile.AssetName(linux: true));
+        Assert.Equal("Waypoint.exe", LauncherFile.ExeName);
+        Assert.Equal("Waypoint-x86_64.AppImage", LauncherFile.AppImageName);
     }
 
     [Theory]

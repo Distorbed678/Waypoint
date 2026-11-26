@@ -213,7 +213,8 @@ partial class ControlTab : UserControl
     LiveRequest Request(LiveMode mode, string? server = null)
     {
         var s = _shared.Settings;
-        s.Walkmaps = Walkmaps.IsChecked == true;
+        // A checkout that cannot record keeps the choice made where one could.
+        if (RecordsUnderProton) s.Walkmaps = Walkmaps.IsChecked == true;
         s.NoBuild = NoBuild.IsChecked == true;
         s.NoExtract = NoExtract.IsChecked == true;
         bool serverHotReload = Repo.HasServerHotReload();

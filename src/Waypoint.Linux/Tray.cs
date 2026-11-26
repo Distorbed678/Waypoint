@@ -20,8 +20,14 @@ sealed class Tray : IDisposable
     public event Action? ShowRequested, StopAllRequested, ExitRequested;
 
     /// <summary>The desktop shows tray icons: a StatusNotifierWatcher has its name on the session bus. Asked once.</summary>
-    public static bool Available => _available ??= WatcherRuns();
-    static bool? _available;
+    public static bool Available => Probe.Result;
+
+    /// <summary>The question to the session bus, asked off the UI thread as soon as Waypoint starts (<see cref="Ask"/>).</summary>
+    static Task<bool> Probe => _probe ??= Task.Run(WatcherRuns);
+    static Task<bool>? _probe;
+
+    /// <summary>Starts the question early, so that the window never waits for the session bus.</summary>
+    public static void Ask() => _ = Probe;
 
     public Tray()
     {
@@ -85,7 +91,7 @@ sealed class Tray : IDisposable
         {
             try
             {
-                using var process = Process.Start(new ProcessStartInfo(program, arguments) { UseShellExecute = false, RedirectStandardOutput = true, RedirectStandardError = true });
+                using var process = Process.Start(new ProcessStartInfo(program, arguments) { UseShellExecute = false, RedirectStandardOutput = true });
                 if (process is null) continue;
                 var output = process.StandardOutput.ReadToEndAsync();
                 if (!process.WaitForExit(2000))
