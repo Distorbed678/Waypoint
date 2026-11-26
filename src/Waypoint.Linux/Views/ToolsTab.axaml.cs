@@ -4,7 +4,7 @@ using Avalonia.Threading;
 
 namespace Waypoint;
 
-/// <summary>Tools for the game itself, each in its own window: the item crafter, the lab layout (as on Windows).</summary>
+/// <summary>Tools for the game itself, each in its own window: the map viewer, the item crafter, the lab layout (as on Windows).</summary>
 partial class ToolsTab : UserControl
 {
     /// <summary>Simple mode's way to the Console and Logs sections, which its list leaves out.</summary>
@@ -34,7 +34,22 @@ partial class ToolsTab : UserControl
     Shared _shared = null!;
     ItemCrafterWindow? _crafter;
 
-    public void Attach(Shared shared) => _shared = shared;
+    MapViewerWindow? _mapViewer;
+
+    public void Attach(Shared shared)
+    {
+        _shared = shared;
+        MapButton.IsEnabled = !Repo.IsInstall && MapViewerHelper.IsAvailable(Environment.CurrentDirectory);
+        ToolTip.SetTip(MapButton, MapButton.IsEnabled ? null : L.Text("The map viewer needs a source checkout with the terrain generator and extracted game data."));
+    }
+
+    void OpenMapViewer(object? sender, RoutedEventArgs e)
+    {
+        if (_mapViewer is { IsVisible: true }) { _mapViewer.Activate(); return; }
+        _mapViewer = new MapViewerWindow(_shared) { WindowStartupLocation = WindowStartupLocation.CenterScreen };
+        _mapViewer.Closed += (_, _) => _mapViewer = null;
+        _mapViewer.Show();
+    }
 
     /// <summary>The crafter's window, or the one already open brought forward. It is offered on a release too: its window
     /// reads the Gateway's assembly before asking it for the `crafter` mode (CrafterCatalog.HasCrafter), and gives items

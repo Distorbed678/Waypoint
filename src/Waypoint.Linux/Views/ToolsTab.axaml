@@ -5,6 +5,18 @@
   <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
     <StackPanel>
       <WrapPanel>
+        <Border Classes="card" Width="340" Margin="0,0,14,14">
+          <DockPanel>
+            <Button x:Name="MapButton" Classes="accent" DockPanel.Dock="Bottom" HorizontalAlignment="Left" Margin="0,12,0,0" Click="OpenMapViewer"
+                    Content="{l:Loc 'Open map viewer'}" ToolTip.ShowOnDisabled="True" />
+            <icons:MaterialIcon DockPanel.Dock="Left" Kind="MapOutline" Width="36" Height="36" Margin="0,0,14,0" VerticalAlignment="Top"
+                                Foreground="{DynamicResource Shell.Accent}" />
+            <StackPanel>
+              <TextBlock Text="{l:Loc 'Map viewer'}" FontSize="15" FontWeight="SemiBold" />
+              <TextBlock Classes="note" Margin="0,4,0,0" Text="{l:Loc 'Inspect generated maps, tiles, walkability and points of interest.'}" />
+            </StackPanel>
+          </DockPanel>
+        </Border>
         <!-- One card per tool. -->
         <Border Classes="card" Width="340" Margin="0,0,14,14">
           <DockPanel>
