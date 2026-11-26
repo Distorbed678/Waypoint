@@ -38,6 +38,23 @@ partial class ToolsTab : UserControl
     /// <summary>The two cards that lead to Console and Logs, for the mode whose list has neither.</summary>
     public void ShowMode(bool simple) => ConsoleCard.IsVisible = LogsCard.IsVisible = simple;
 
+    LabLayoutWindow? _labLayout;
+
+    /// <summary>The lab layout's window, or the one already open brought forward. A window of its own, not owned by
+    /// Waypoint's: either can be in front.</summary>
+    void OpenLabLayout(object? sender, RoutedEventArgs e)
+    {
+        if (_labLayout is { IsVisible: true })
+        {
+            if (_labLayout.WindowState == WindowState.Minimized) _labLayout.WindowState = WindowState.Normal;
+            _labLayout.Activate();
+            return;
+        }
+        _labLayout = new LabLayoutWindow { WindowStartupLocation = WindowStartupLocation.CenterScreen };
+        _labLayout.Closed += (_, _) => _labLayout = null;
+        _labLayout.Show();
+    }
+
     void OpenConsole(object? sender, RoutedEventArgs e) => ConsoleRequested?.Invoke();
 
     void OpenLogs(object? sender, RoutedEventArgs e) => LogsRequested?.Invoke();
