@@ -1162,6 +1162,9 @@ Close the game and anything else using that folder, then try again.</value>
   <data name="Text_1f562c8a9cec" xml:space="preserve">
     <value>{0} is not a LocalExile release.</value>
   </data>
+  <data name="Text_1f56d71d6326" xml:space="preserve">
+    <value>-Walkmaps: capture each area's walk map under Proton. The game starts with the recorder, which LocalExile builds with g++ the first time.</value>
+  </data>
   <data name="Text_1f88699e6094" xml:space="preserve">
     <value>Previous map</value>
   </data>

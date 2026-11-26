@@ -136,10 +136,17 @@ partial class ControlTab : UserControl
 
     Window? Owner => TopLevel.GetTopLevel(this) as Window;
 
+    /// <summary>The checkout's live.ps1 records walk maps on Linux: LocalExile's Proton transport (scripts/walkmaps/proton.py)
+    /// starts the client with a Frida Gum recorder preloaded, so Linux needs no Frida package and nothing to install here.
+    /// A checkout older than that refuses -Walkmaps on Linux.</summary>
+    static bool RecordsUnderProton => File.Exists(Path.Combine("scripts", "walkmaps", "proton.py"));
+
     public void Attach(Shared shared)
     {
         _shared = shared;
-        // Walk maps stays off here, whatever the settings say: live.ps1 refuses -Walkmaps on Linux.
+        // Walk maps where the checkout's live.ps1 records under Proton; otherwise off and out of sight, whatever the settings say.
+        Walkmaps.IsVisible = RecordsUnderProton;
+        Walkmaps.IsChecked = RecordsUnderProton && shared.Settings.Walkmaps;
         NoBuild.IsChecked = shared.Settings.NoBuild;
         NoExtract.IsChecked = shared.Settings.NoExtract;
         HotReload.IsChecked = shared.Settings.HotReload;
@@ -147,7 +154,7 @@ partial class ControlTab : UserControl
         ServerFolder.Text = Environment.CurrentDirectory;
         ToolTip.SetTip(ServerFolder, Environment.CurrentDirectory);
         ServiceList.ItemsSource = Repo.IsInstall ? _rows.Where(r => r.Service.Kind is ServiceKind.Server or ServiceKind.Client).ToList()
-            : _rows.Where(r => r.Service.Kind != ServiceKind.Recorder).ToList();
+            : _rows.Where(r => r.Service.Kind != ServiceKind.Recorder || RecordsUnderProton).ToList();
         if (Repo.IsInstall)
             foreach (var element in new Control[] { StopServersButton, RunOptions, CheckAgainButton, GameDataButton }) element.IsVisible = false;
         shared.Monitor.Sampled += samples => Dispatcher.UIThread.Post(() => ShowServices(samples));

@@ -1162,6 +1162,9 @@
   <data name="Text_1f562c8a9cec" xml:space="preserve">
     <value>{0} 不是 LocalExile 发行版。</value>
   </data>
+  <data name="Text_1f56d71d6326" xml:space="preserve">
+    <value>-Walkmaps：在 Proton 下记录每个区域的行走地图。游戏会随记录器一起启动，LocalExile 第一次会用 g++ 构建该记录器。</value>
+  </data>
   <data name="Text_1f88699e6094" xml:space="preserve">
     <value>上一张地图</value>
   </data>

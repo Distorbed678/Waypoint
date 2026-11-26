@@ -1162,6 +1162,9 @@
   <data name="Text_1f562c8a9cec" xml:space="preserve">
     <value>{0} не является релизом LocalExile.</value>
   </data>
+  <data name="Text_1f56d71d6326" xml:space="preserve">
+    <value>-Walkmaps: записывать карту проходимости каждой области под Proton. Игра запускается с записывающим модулем, который LocalExile в первый раз собирает с помощью g++.</value>
+  </data>
   <data name="Text_1f88699e6094" xml:space="preserve">
     <value>Предыдущая карта</value>
   </data>
