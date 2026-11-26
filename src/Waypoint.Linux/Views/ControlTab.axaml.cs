@@ -311,10 +311,23 @@ partial class ControlTab : UserControl
                     _serversAnswered = true;
                     return true;
                 }
-                Say(() => L.Text("Not started: the game client does not fit this LocalExile."));
+                if (!_moving) Say(() => L.Text("Not started: the game client does not fit this LocalExile."));
                 return false;
         }
     }
+
+    /// <summary>The Game client window's "Use another client…" on a source copy: the check and the move that come before a
+    /// Play (<see cref="ClientFitsNow"/>), with nothing started after them.</summary>
+    internal async Task MoveClientAsync()
+    {
+        if (Repo.IsInstall || _live || _checking) return;
+        _checking = _moving = true;
+        try { await ClientFitsNow(new LiveRequest(LiveMode.All), again: false); }
+        finally { _checking = _moving = false; }
+    }
+
+    /// <summary>The check runs for <see cref="MoveClientAsync"/>: nothing was about to start, so a no says nothing.</summary>
+    bool _moving;
 
     /// <summary>The setup guide, with <paramref name="client"/> chosen on its client page.</summary>
     void OpenGuideWith(string? client)

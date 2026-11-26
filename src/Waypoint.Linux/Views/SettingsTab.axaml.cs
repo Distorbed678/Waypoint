@@ -53,6 +53,11 @@ partial class SettingsTab : UserControl
         KeepUpToDate.IsChecked = S.KeepUpToDate;
         UseProfile.IsChecked = S.UseLocalProfile;
         DeveloperMode.IsChecked = S.Developer;
+        // Versions of the game come from Steam for a release (ClientVersionsWindow), where the tool for it runs.
+        ClientSwitchGroup.IsVisible = Repo.IsInstall && DepotTool.Supported;
+        SwitchKeepBoth.IsChecked = S.ClientSwitch == nameof(SwitchWay.KeepBoth);
+        SwitchInPlace.IsChecked = S.ClientSwitch == nameof(SwitchWay.UpdateInPlace);
+        SwitchAsk.IsChecked = SwitchKeepBoth.IsChecked != true && SwitchInPlace.IsChecked != true;
         // Developer Mode is a release's: there it unlocks the switch. A source copy is in Advanced mode whatever it says,
         // and nothing shown there writes the mode chosen on a release.
         DeveloperGroup.IsVisible = Repo.IsInstall;
@@ -120,6 +125,13 @@ partial class SettingsTab : UserControl
         if (_loading || _shared is null) return;
         S.AlwaysAskOnClose = AlwaysAsk.IsChecked == true;
         S.CloseBehaviorConfirmed = true;
+        S.Save();
+    }
+
+    void ClientSwitchChanged(object? sender, RoutedEventArgs e)
+    {
+        if (_loading || _shared is null || sender is not RadioButton { IsChecked: true }) return;
+        S.ClientSwitch = SwitchKeepBoth.IsChecked == true ? nameof(SwitchWay.KeepBoth) : SwitchInPlace.IsChecked == true ? nameof(SwitchWay.UpdateInPlace) : "";
         S.Save();
     }
 

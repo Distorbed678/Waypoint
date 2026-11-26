@@ -1,4 +1,5 @@
 <UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="clr-namespace:Waypoint"
              x:Class="Waypoint.SettingsTab">
   <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
     <StackPanel MaxWidth="820" HorizontalAlignment="Left" Spacing="12" Margin="0,0,14,0">
@@ -32,6 +33,20 @@
             <CheckBox x:Name="KeepUpToDate" IsCheckedChanged="KeepUpToDateChanged" />
           </StackPanel>
         </DockPanel>
+      </Border>
+
+      <!-- How a release moves to another version of the game from Steam (ClientVersionsWindow). -->
+      <Border x:Name="ClientSwitchGroup" Classes="card">
+        <StackPanel Spacing="4">
+          <TextBlock Text="{l:Loc 'Game client versions'}" Classes="heading" />
+          <TextBlock Text="{l:Loc 'When a LocalExile folder that has a game client gets another version from Steam:'}" TextWrapping="Wrap" Margin="0,0,0,2" />
+          <RadioButton x:Name="SwitchAsk" GroupName="ClientSwitch" Content="{l:Loc 'Ask each time'}" IsCheckedChanged="ClientSwitchChanged" />
+          <RadioButton x:Name="SwitchKeepBoth" GroupName="ClientSwitch" Content="{l:Loc 'Always keep both versions'}" IsCheckedChanged="ClientSwitchChanged"
+                       ToolTip.Tip="{l:Loc 'The client in use is set aside and the other version is made beside it. It needs the room of both, and going back is instant.'}" />
+          <RadioButton x:Name="SwitchInPlace" GroupName="ClientSwitch" Content="{l:Loc 'Always update the one client in place'}" IsCheckedChanged="ClientSwitchChanged"
+                       ToolTip.Tip="{l:Loc 'The one client becomes the other version. Only what differs is downloaded and it needs no more room, but the version it was is gone.'}" />
+          <TextBlock Text="{l:Loc 'A way the drive has no room for is asked about instead.'}" Classes="note" Margin="0,2,0,0" />
+        </StackPanel>
       </Border>
 
       <Border x:Name="DeveloperGroup" Classes="card">

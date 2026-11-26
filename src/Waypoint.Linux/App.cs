@@ -234,7 +234,11 @@ static class Program
         var type = typeof(Program).Assembly.GetType("Waypoint." + parts[0], throwOnError: true)!;
         if (!typeof(Avalonia.Controls.Window).IsAssignableFrom(type))
             return new Avalonia.Controls.Window { Width = 970, Height = 700, Content = Attached(type, new Shared()) };
-        var window = (Avalonia.Controls.Window)Activator.CreateInstance(type)!;
+        // A window that takes its owner and the shared state (the Game client window, the item crafter) gets none and a new one.
+        var window = type.GetConstructor(Type.EmptyTypes) is not null ? (Avalonia.Controls.Window)Activator.CreateInstance(type)!
+            : (Avalonia.Controls.Window)type.GetConstructors(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).First()
+                .Invoke([.. type.GetConstructors(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).First().GetParameters()
+                    .Select(p => p.ParameterType == typeof(Shared) ? new Shared() : p.HasDefaultValue ? p.DefaultValue : null)]);
         if (window is SetupWizard guide && parts.Length > 1) guide.ShowPage(parts[1]);
         return window;
     }

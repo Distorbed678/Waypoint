@@ -137,6 +137,9 @@ public partial class MainWindow : Window
         ReleasesView.ChangeFolderRequested += Setup.ChangeFolder;
         Control.ChangeFolderRequested += Setup.ChangeFolder;
         Folders.NewCopyRequested += Setup.SetUpNewCopy;
+        Folders.GameClientRequested += OpenGameClient;
+        InstallView.ClientChanged += Folders.ShowCurrent;
+        InstallView.ShowRequested += () => ShowSection(InstallView);
         // The choice page's "Use Advanced mode": this copy is shown in Advanced mode from now on. The choice made on a
         // release (Developer Mode, Simple or Advanced) is not touched.
         PlayView.AdvancedRequested += () =>
@@ -242,6 +245,23 @@ public partial class MainWindow : Window
         _shared.Settings.AdvancedMode = advanced;
         _shared.Settings.Save();
         ShowMode();
+    }
+
+    /// <summary>The sidebar's "Game client…": the clients of the folder in use. A source copy's move to another client is
+    /// Control's, the one that comes before its Play; a release's is its Play page's.</summary>
+    void OpenGameClient()
+    {
+        if (Repo.IsInstall)
+        {
+            InstallView.OpenClientVersions();
+            return;
+        }
+        var window = new ClientVersionsWindow(this, _shared);
+        window.ShowDialog();
+        if (window.Changed) Folders.ShowCurrent();
+        if (!window.MoveRequested) return;
+        ShowSection(Control);
+        _ = Control.MoveClientAsync();
     }
 
     void CheckoutMoved()
