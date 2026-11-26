@@ -440,6 +440,36 @@ public sealed class LeagueCustomizationTests : IDisposable
         Assert.True(JsonNode.DeepEquals(catalog.Review, await AdapterReview(Environment)));
     }
     [Fact]
+    public void What_a_module_or_mod_declares_holds_for_the_whole_list()
+    {
+        // As LocalExile's ModFolders reads them: a module's "conflicts", a mod's "only", one that is no list, a key in another
+        // case (not read), and a mod of every league, which declares them as well.
+        Catalog();
+        Write("Modules/Extra/X/module.json", """{"id":"X","depends":["Game"],"conflicts":["Y"]}""");
+        Write("Modules/Extra/Y/module.json", """{"id":"Y","depends":["Game"],"only":"X"}""");
+        Write("Mods/Binaries/solo/mod.json", """{"leagues":"listed","name":"Solo","only":["Vendors"]}""");
+        Write("Mods/Binaries/loud/mod.json", """{"leagues":"listed","Only":["Vendors"]}""");
+        Write("Mods/Binaries/every/mod.json", """{"only":["Vendors"]}""");
+        var environment = Environment with { Mods = Path.Combine(_root, "Mods", "Binaries") };
+        var catalog = new GameSystems(environment);
+        var standard = catalog.Leagues.Single(l => l.Name == "Standard");
+        Assert.Null(catalog.CompositionError(standard, [.. standard.Systems, "Extra/X"]));
+        Assert.Contains("cannot run with Y", catalog.CompositionError(standard, [.. standard.Systems, "Extra/X", "Extra/Y"]));
+        // Beside one that names the only ones it allows, nothing else but the game, in a new league too.
+        Assert.Contains("Solo allows only the modules and mods it names, not Harvest", catalog.CompositionError(standard, [.. standard.Systems, "solo"]));
+        Assert.Null(catalog.CompositionError(standard, ["Core/Game", "Core/Vendors", "solo"]));
+        Assert.Contains("not Harvest", Assert.Throws<InvalidOperationException>(() => catalog.PlanCreate(standard, "My Solo", "Mine.", ["Core/Game", "Core/Harvest", "solo"])).Message);
+        Assert.NotNull(catalog.PlanCreate(standard, "My Solo", "Mine.", ["Core/Game", "Core/Vendors", "solo"]));
+        Assert.Contains("every allows only", catalog.CompositionError(standard, [.. standard.Systems, "every"]));
+        // An "only" that is no list, or under another case, declares nothing.
+        Assert.Null(catalog.CompositionError(standard, [.. standard.Systems, "Extra/Y", "loud"]));
+        // A saved change that breaks one is skipped by LocalExile: the league shows its own list.
+        Write("data/league-modules.json", """{"Standard":{"add":["solo"],"remove":[]}}""");
+        catalog = new GameSystems(environment);
+        standard = catalog.Leagues.Single(l => l.Name == "Standard");
+        Assert.Equal(standard.BaseSystems, standard.Systems);
+    }
+    [Fact]
     public async Task A_leagues_mod_is_listed_like_a_module_and_a_mods_league_is_a_league()
     {
         // Mods of the leagues that list them (bots, idols), one of every league, two turned off, one with a module's id.

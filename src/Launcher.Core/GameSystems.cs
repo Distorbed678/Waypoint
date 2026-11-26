@@ -43,6 +43,8 @@ public sealed partial class GameSystems
     public IReadOnlyList<GameLeague> Leagues { get; }
     readonly string[] _definitionOrder;
     readonly HashSet<string> _onMods;
+    /// <summary>What each module and each mod that is on declares about the company it keeps (<see cref="Limits"/>), by id.</summary>
+    readonly Dictionary<string, (string[] Conflicts, string[]? Only)> _limits = new(StringComparer.OrdinalIgnoreCase);
     public JsonObject Choices { get; }
     public string ChoicesHash { get; }
     public ContentEnvironment Environment { get; }
@@ -65,6 +67,15 @@ public sealed partial class GameSystems
     }
     static string Id(string path) => Normal(path).Split('/')[^1];
     static JsonNode? Field(JsonObject json, string key) => json.FirstOrDefault(p => p.Key.Equals(key, StringComparison.OrdinalIgnoreCase)).Value;
+    /// <summary>A manifest's "conflicts" and "only", as LocalExile's ModFolders.Limits reads them: these keys exactly, lists
+    /// of ids, or no limits from it at all when one of them is something else (LocalExile logs that manifest).
+    /// scripts/LeagueData.py's limits too.</summary>
+    static (string[] Conflicts, string[]? Only) Limits(JsonObject json)
+    {
+        string[]? Ids(string key) => !json.TryGetPropertyValue(key, out var node) ? null : node is JsonArray list ? Strings(list) : throw new InvalidDataException();
+        try { return (Ids("conflicts") ?? [], Ids("only")); }
+        catch (InvalidDataException) { return ([], null); }
+    }
     /// <summary>The mods that are on, in the order LocalExile reads them (its ModFolders.On): a folder with a readable
     /// mod.json, not turned off by it or by mod-state.txt. scripts/LeagueData.py reads them the same way.</summary>
     static IEnumerable<(string Id, string Folder, JsonObject Json)> OnMods(string mods)
@@ -123,8 +134,11 @@ public sealed partial class GameSystems
             string path = Normal(Path.GetRelativePath(environment.Modules, folder));
             string id = Text(json, "id", Path.GetFileName(folder));
             if (!ModCatalog.ValidId(id) || id != Path.GetFileName(folder) || systems.Any(s => s.Id.Equals(id, StringComparison.OrdinalIgnoreCase))) throw new InvalidDataException(L.Text("Invalid or duplicate module ID."));
+            _limits[id] = Limits(json);
             systems.Add(new(id, path, Text(json, "name", id), Text(json, "description"), Strings(json["depends"]), folder));
         }
+        // Every mod that is on declares its limits, as LocalExile reads them, but one with a module's id.
+        foreach (var mod in mods) _limits.TryAdd(mod.Id, Limits(mod.Json));
         // A mod of the leagues that list it is listed by its id. One with a module's id does not load (the module runs), nor
         // does one named exactly as a league's folder, nor one whose depends is not a list of ids (LocalExile's ModHost).
         foreach (var mod in mods)
@@ -182,6 +196,8 @@ public sealed partial class GameSystems
             {
                 foreach (string removed in Strings(changes["remove"])) if (!Id(removed).Equals("Game", StringComparison.OrdinalIgnoreCase)) selected.RemoveAll(p => Id(p).Equals(Id(removed), StringComparison.OrdinalIgnoreCase));
                 foreach (string added in Strings(changes["add"])) if (!selected.Any(p => Id(p).Equals(Id(added), StringComparison.OrdinalIgnoreCase))) selected.Add(Canon(added));
+                // A change that breaks what a module or mod declares is skipped by LocalExile (its ChangeModules): the league runs its own list.
+                if (Clash(selected) is not null) selected = [.. original];
             }
             string description = Text(json, "description");
             return new(name, folder, original, selected.ToArray(), description.Length > 0 ? description : "The " + name + " league.", json["creatable"]?.GetValue<bool>() ?? true, json["ended"]?.GetValue<bool>() ?? false,

@@ -6957,6 +6957,9 @@ Owned servers will stop. Automatic backup is {2}. Source, client and login keys 
   <data name="Text_b9d5ec6bc16f" xml:space="preserve">
     <value>This client is a link to {0}, and anything else started from that folder would use the same settings.</value>
   </data>
+  <data name="Text_b9dbb805fc1c" xml:space="preserve">
+    <value>{0} cannot run with {1}.</value>
+  </data>
   <data name="Text_b9f4f560cff4" xml:space="preserve">
     <value>A pull request that is not in the open list: its head is fetched from GitHub by number</value>
   </data>
@@ -7343,6 +7346,9 @@ Owned servers will stop. Automatic backup is {2}. Source, client and login keys 
   </data>
   <data name="Text_c5132d954d7b" xml:space="preserve">
     <value>Remember this for next time</value>
+  </data>
+  <data name="Text_c533559f1887" xml:space="preserve">
+    <value>{0} allows only the modules and mods it names, not {1}.</value>
   </data>
   <data name="Text_c53d2d6c95e3" xml:space="preserve">
     <value>Click for your other LocalExile folders</value>
