@@ -73,11 +73,12 @@ public sealed partial class GameSystems
         foreach (string folder in Directory.GetDirectories(mods).OrderBy(f => Path.GetFileName(f), StringComparer.Ordinal).Take(512))
         {
             string id = Path.GetFileName(folder), file = Path.Combine(folder, "mod.json");
-            if (!ModCatalog.ValidId(id) || !File.Exists(file)) continue;
+            if (!ModCatalog.ValidId(id) || !File.Exists(file) || !ModCatalog.Physical(folder)) continue;
             JsonObject json;
             // No readable mod.json (a key twice shows when the object is first used): no mod.
             try { json = Read(file); _ = json.Count; }
-            catch (Exception e) when (e is System.Text.Json.JsonException or InvalidDataException or InvalidOperationException or ArgumentException) { continue; }
+            catch (Exception e) when (e is System.Text.Json.JsonException or InvalidDataException or InvalidOperationException or ArgumentException
+                or IOException or UnauthorizedAccessException) { continue; }
             if (choices.GetValueOrDefault(id, Field(json, "enabled") is not JsonValue enabled || !enabled.TryGetValue(out bool on) || on)) yield return (id, folder, json);
         }
     }
@@ -112,25 +113,44 @@ public sealed partial class GameSystems
             if (!ModCatalog.ValidId(id) || id != Path.GetFileName(folder) || systems.Any(s => s.Id.Equals(id, StringComparison.OrdinalIgnoreCase))) throw new InvalidDataException(L.Text("Invalid or duplicate module ID."));
             systems.Add(new(id, path, Text(json, "name", id), Text(json, "description"), Strings(json["depends"]), folder));
         }
-        // A mod of the leagues that list it is listed by its id. One with a module's id does not load: the module runs.
+        // A mod of the leagues that list it is listed by its id. One with a module's id does not load (the module runs), nor
+        // does one named exactly as a league's folder, nor one whose depends is not a list of ids (LocalExile's ModHost).
         foreach (var mod in mods)
-            if (Field(mod.Json, "leagues") is JsonValue scope && scope.TryGetValue(out string? listed) && listed == "listed"
-                && !systems.Any(s => s.Id.Equals(mod.Id, StringComparison.OrdinalIgnoreCase)))
-                systems.Add(new(mod.Id, mod.Id, Field(mod.Json, "name") is JsonValue name && name.TryGetValue(out string? title) && title.Length > 0 ? title : mod.Id,
-                    Field(mod.Json, "description") is JsonValue text && text.TryGetValue(out string? description) ? description : "", Strings(Field(mod.Json, "depends")), mod.Folder, Mod: true));
+        {
+            if (Field(mod.Json, "leagues") is not JsonValue scope || !scope.TryGetValue(out string? listed) || listed != "listed"
+                || systems.Any(s => s.Id.Equals(mod.Id, StringComparison.OrdinalIgnoreCase)) || _definitionOrder.Any(d => Path.GetFileName(d) == mod.Id)) continue;
+            string[] depends;
+            try { depends = Strings(Field(mod.Json, "depends")); }
+            catch (InvalidDataException) { continue; }
+            systems.Add(new(mod.Id, mod.Id, Field(mod.Json, "name") is JsonValue name && name.TryGetValue(out string? title) && title.Length > 0 ? title : mod.Id,
+                Field(mod.Json, "description") is JsonValue text && text.TryGetValue(out string? description) ? description : "", depends, mod.Folder, Mod: true));
+        }
         // An entry names a mod by its id in any case, also as the last part of the path it had as a module.
         string Canon(string path) => systems.FirstOrDefault(s => s.Mod && s.Id.Equals(Id(path), StringComparison.OrdinalIgnoreCase))?.Path ?? Normal(path);
         Systems = systems.OrderBy(s => s.Name, StringComparer.CurrentCultureIgnoreCase).ToArray();
         ChoicesHash = Hash(environment.Choices);
         Choices = File.Exists(environment.Choices) ? Read(environment.Choices) : new();
         var leagues = new List<GameLeague>();
-        foreach (var (file, mod) in roots.SelectMany(r => Manifests(r.Root, "league.json").Select(f => (f, r.Mod))))
+        // A mod's leagues as LocalExile reads them: the folders directly in its Leagues/, with a league.json and Source/ or
+        // Binaries/. One that cannot be read is not there, as for LocalExile, which loads the others.
+        var files = Manifests(environment.Leagues, "league.json").Select(f => (File: f, Mod: ""))
+            .Concat(roots.Skip(1).Where(r => Directory.Exists(r.Root)).SelectMany(r => Directory.GetDirectories(r.Root).Order(StringComparer.Ordinal)
+                .Where(d => File.Exists(Path.Combine(d, "league.json")) && (Directory.Exists(Path.Combine(d, "Source")) || Directory.Exists(Path.Combine(d, "Binaries"))))
+                .Select(d => (File: Path.Combine(d, "league.json"), r.Mod))));
+        foreach (var (file, mod) in files)
         {
-            var json = Read(file); string folder = Path.GetDirectoryName(file)!;
+            if (mod.Length == 0) { leagues.Add(League(file, mod)!); continue; }
+            try { if (League(file, mod) is { } added) leagues.Add(added); }
+            catch (Exception e) when (e is IOException or UnauthorizedAccessException or InvalidDataException or InvalidOperationException
+                or System.Text.Json.JsonException or ArgumentException or FormatException) { }
+        }
+        GameLeague? League(string file, string mod)
+        {
+            var json = Read(file); _ = json.Count; string folder = Path.GetDirectoryName(file)!;
             string name = Text(json, "name", Path.GetFileName(folder));
             bool known = leagues.Any(l => l.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
             // A mod's league of a name that is taken is not loaded: the first of a name stays.
-            if (mod.Length > 0 && known) continue;
+            if (mod.Length > 0 && known) return null;
             if (!ModSettingsForm.ValidSettingsId(Path.GetFileName(folder), "leagues") || known) throw new InvalidDataException(L.Text("Invalid or duplicate league."));
             // What it is made of: its modules, then the mods its league.json names.
             string[] own = Strings(json["mods"]);
@@ -146,11 +166,11 @@ public sealed partial class GameSystems
                 foreach (string added in Strings(changes["add"])) if (!selected.Any(p => Id(p).Equals(Id(added), StringComparison.OrdinalIgnoreCase))) selected.Add(Canon(added));
             }
             string description = Text(json, "description");
-            leagues.Add(new(name, folder, original, selected.ToArray(), description.Length > 0 ? description : "The " + name + " league.", json["creatable"]?.GetValue<bool>() ?? true, json["ended"]?.GetValue<bool>() ?? false,
+            return new(name, folder, original, selected.ToArray(), description.Length > 0 ? description : "The " + name + " league.", json["creatable"]?.GetValue<bool>() ?? true, json["ended"]?.GetValue<bool>() ?? false,
                 json["hardcore"]?.GetValue<bool>() ?? false, json["ssf"]?.GetValue<bool>() ?? false, Text(json, "form"), Text(json, "parent"), Text(json, "entryOf"), Text(json, "entryKind"),
                 Text(json, "base", name), Text(json, "dataSet"), File.Exists(Path.Combine(folder, ".waypoint-league.json")),
                 File.Exists(Path.Combine(folder, ".waypoint-league.json")) ? Text(Read(Path.Combine(folder, ".waypoint-league.json")), "template") : "", json["entryOf"] is JsonValue)
-                { Mod = mod, Mods = own });
+                { Mod = mod, Mods = own };
         }
         Leagues = leagues.OrderBy(l => l.Name == "Standard" ? "" : l.Name).ToArray();
         if (!JsonNode.DeepEquals(reviewed, CaptureReview(environment))) throw new IOException(L.Text("Settings changed while reading. Refresh before editing."));

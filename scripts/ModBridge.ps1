@@ -345,6 +345,13 @@ function Test-LegacyReleaseMods {
     # 0.2.0 itself: an alpha came before the beta.
     return $Matches[4] -and $Matches[4] -like 'alpha*'
 }
+# A release whose version is above this one (its prerelease part aside): what it ships came after that release.
+function Test-ReleaseAfter([string]$version) {
+    if (-not $script:isRelease) { return $false }
+    try { $own = [string](Get-Content -LiteralPath (At 'release.json') -Raw | ConvertFrom-Json).version } catch { return $false }
+    if ($own -notmatch '^[vV]?(\d+)\.(\d+)\.(\d+)') { return $false }
+    return [version]"$($Matches[1]).$($Matches[2]).$($Matches[3])" -gt [version]$version
+}
 function Invoke-ModOperation($snapshot) {
     if ($Action -in @('InstallMod','SaveModSettings','UninstallMod')) {
         Require (-not (Test-LegacyReleaseMods)) 'This release does not declare compatibility with downloadable mods. Use a current source checkout to install or update mods.'

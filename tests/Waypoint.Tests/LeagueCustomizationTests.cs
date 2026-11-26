@@ -505,5 +505,53 @@ public sealed class LeagueCustomizationTests : IDisposable
         // Without the mods' folder nothing of it is read.
         Assert.DoesNotContain(new GameSystems(Environment).Systems, s => s.Mod);
     }
+    [Fact]
+    public async Task Mods_that_cannot_be_read_are_left_out_as_LocalExile_leaves_them_out_and_both_sides_agree()
+    {
+        void Mod(string id, string json) => Write($"Mods/Binaries/{id}/mod.json", json);
+        Catalog();
+        Mod("idols", """{"leagues":"listed"}""");
+        Write("Mods/Binaries/idols/Leagues/Phrecia/league.json", """{"name":"Phrecia","base":"Standard","parent":"Standard","mods":["idols"]}""");
+        Write("Mods/Binaries/idols/Leagues/Phrecia/modules.json", """{"modules":["Core/Game"]}""");
+        Write("Mods/Binaries/idols/Leagues/Phrecia/Source/Fixture.cs", "public sealed class FixtureLeague : League { }");
+        // A league that cannot be read, one without Source/ or Binaries/, one deeper than the folder's own.
+        Write("Mods/Binaries/idols/Leagues/Broken/league.json", """{"name":"Broken","creatable":"yes"}""");
+        Directory.CreateDirectory(Path.Combine(_root, "Mods/Binaries/idols/Leagues/Broken/Source"));
+        Write("Mods/Binaries/idols/Leagues/NoSource/league.json", """{"name":"NoSource"}""");
+        Write("Mods/Binaries/idols/Leagues/NoSource/modules.json", """{"modules":["Core/Game"]}""");
+        Write("Mods/Binaries/idols/Leagues/Deep/Inner/league.json", """{"name":"Deep"}""");
+        // In UTF-16, a key in two cases (the first counts), "depends": null.
+        Directory.CreateDirectory(Path.Combine(_root, "Mods/Binaries/every"));
+        File.WriteAllText(Path.Combine(_root, "Mods/Binaries/every/mod.json"), """{"leagues":"listed","LEAGUES":"all","depends":null}""", System.Text.Encoding.Unicode);
+        // depends that is no list: that mod is not loaded, and nothing else fails.
+        Mod("odd", """{"leagues":"listed","depends":"Game"}""");
+        // A mod of every league, a league mod that depends on it, and one named exactly as a league's folder.
+        Mod("lib", "{}");
+        Mod("uses", """{"leagues":"listed","depends":["lib"]}""");
+        Mod("Standard", """{"leagues":"listed"}""");
+        var environment = Environment with { Mods = Path.Combine(_root, "Mods", "Binaries") };
+        var catalog = new GameSystems(environment);
+
+        Assert.Equal(["every", "idols", "uses"], catalog.Systems.Where(s => s.Mod).Select(s => s.Id).Order());
+        Assert.Empty(catalog.Systems.Single(s => s.Id == "every").Depends);
+        Assert.Equal(["Phrecia"], catalog.Leagues.Where(l => l.Mod.Length > 0).Select(l => l.Name));
+        var standard = catalog.Leagues.Single(l => l.Name == "Standard");
+        Assert.Null(catalog.CompositionError(standard, [.. standard.Systems, "uses"]));
+        // A new league is not named as an installed mod; a template is found by its league's name.
+        Assert.NotNull(catalog.NewNameError("lib"));
+        var phrecia = catalog.Leagues.Single(l => l.Name == "Phrecia");
+        Assert.Equal("Phrecia", catalog.PlanCreate(phrecia, "My Phrecia", "Mine.", phrecia.BaseSystems)["template"]!.GetValue<string>());
+        Assert.True(JsonNode.DeepEquals(catalog.Review, await AdapterReview(environment)));
+        // The league's own mod, not on: the league is not loaded.
+        Write("Mods/Binaries/mod-state.txt", "idols off\n");
+        Write("Leagues/Needs/league.json", """{"name":"Needs","base":"Standard","parent":"Void","mods":["idols"]}""");
+        Write("Leagues/Needs/modules.json", """{"modules":["Core/Game"]}""");
+        Write("Leagues/Needs/Source/Fixture.cs", "public sealed class FixtureLeague : League { }");
+        catalog = new GameSystems(environment);
+        var needs = catalog.Leagues.Single(l => l.Name == "Needs");
+        Assert.Equal(["Core/Game", "idols"], needs.BaseSystems);
+        Assert.False(catalog.LoadedDefinition(needs));
+        Assert.True(JsonNode.DeepEquals(catalog.Review, await AdapterReview(environment)));
+    }
     public void Dispose() { if (Directory.Exists(_root)) Directory.Delete(_root, true); }
 }

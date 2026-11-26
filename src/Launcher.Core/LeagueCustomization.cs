@@ -47,9 +47,11 @@ public sealed partial class GameSystems
             foreach (string folder in Directory.GetDirectories(environment.Mods).OrderBy(f => Path.GetFileName(f), StringComparer.Ordinal).Take(512))
             {
                 string id = Path.GetFileName(folder), file = Path.Combine(folder, "mod.json");
-                if (!ModCatalog.ValidId(id) || !File.Exists(file)) continue;
+                if (!ModCatalog.ValidId(id) || !File.Exists(file) || !ModCatalog.Physical(folder)) continue;
                 Add("mod/", environment.Mods, file);
-                AddLeagues(Path.Combine(folder, "Leagues"), id);
+                // A redirected or too deep Leagues/ is not read (GameSystems skips it): not inventoried either.
+                try { AddLeagues(Path.Combine(folder, "Leagues"), id); }
+                catch (IOException) { foreach (string key in result.Select(p => p.Key).Where(k => k.StartsWith("league/" + id + ":", StringComparison.Ordinal) || k.StartsWith("nested/" + id + ":", StringComparison.Ordinal)).ToArray()) result.Remove(key); }
             }
         }
         return result;
@@ -168,8 +170,12 @@ public sealed partial class GameSystems
             if (done.Contains(module.Id)) return;
             if (!visiting.Add(module.Id)) throw new InvalidOperationException(L.Text("The selected modules contain a dependency cycle."));
             foreach (string id in module.Depends)
+            {
+                // A mod of every league that is on: LocalExile loads it in every league.
+                if (_onMods.Contains(id) && !Systems.Any(s => s.Id.Equals(id, StringComparison.OrdinalIgnoreCase))) continue;
                 Visit(active.FirstOrDefault(s => s.Id.Equals(id, StringComparison.OrdinalIgnoreCase))
                     ?? throw new InvalidOperationException(L.Text("{0} needs {1}. Enable the required module first.", module.Name, id)));
+            }
             visiting.Remove(module.Id); done.Add(module.Id);
         }
         foreach (var module in active) Visit(module);
@@ -309,7 +315,8 @@ public sealed partial class GameSystems
         if (!SafeLeagueName(name)) return L.Text("Use 3–48 English letters, numbers, spaces, underscores or hyphens, starting with a letter.");
         if (Leagues.Any(l => l.Name.Equals(name, StringComparison.OrdinalIgnoreCase) || Path.GetFileName(l.Folder).Equals(name, StringComparison.OrdinalIgnoreCase))
             || Choices.Any(p => p.Key.Equals(name, StringComparison.OrdinalIgnoreCase)) || Directory.Exists(Path.Combine(Environment.Leagues, name))
-            || File.Exists(Path.Combine(Environment.Leagues, name))) return L.Text("That league name is already in use. Choose a new name.");
+            || File.Exists(Path.Combine(Environment.Leagues, name))
+            || Environment.Mods.Length > 0 && Directory.Exists(Path.Combine(Environment.Mods, name))) return L.Text("That league name is already in use. Choose a new name.");
         return null;
     }
 
@@ -326,7 +333,7 @@ public sealed partial class GameSystems
         if (string.IsNullOrWhiteSpace(description) || description.Length > 2000 || description.Any(c => char.IsControl(c) && c is not ('\r' or '\n' or '\t')))
             throw new InvalidOperationException(L.Text("Enter a description of 1–2000 characters."));
         string[] paths = selected.Select(Normal).ToArray(); ValidateComposition(template, paths, forNewLeague: true);
-        return new() { ["template"] = Path.GetFileName(template.Folder), ["name"] = name, ["description"] = description,
+        return new() { ["template"] = template.Name, ["name"] = name, ["description"] = description,
             ["modules"] = new JsonArray(paths.Select(p => (JsonNode)JsonValue.Create(p)).ToArray()), ["review"] = Review.DeepClone() };
     }
 }

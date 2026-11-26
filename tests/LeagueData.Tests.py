@@ -539,8 +539,29 @@ class LeagueDataTests(unittest.TestCase):
                    "review": data.review(self.modules, self.leagues, self.choices, mods)}
         run(request, "CreateLeague")
         made = self.leagues / "My Phrecia"
-        self.assertNotIn("mods", data.read_json(made / "league.json"))
-        self.assertEqual(data.read_json(made / "modules.json")["modules"], ["Core/Game", "idols"])
+        self.assertEqual(data.read_json(made / "league.json")["mods"], ["idols"])
+        self.assertEqual(data.read_json(made / "modules.json")["modules"], ["Core/Game"])
+        # A new league's name is not an installed mod's.
+        with self.assertRaisesRegex(data.AccountError, "already in use"):
+            run({**request, "name": "every", "review": data.review(self.modules, self.leagues, self.choices, mods)}, "CreateLeague")
+        # What GameSystems reads the same way: a mod.json in UTF-16, a key in two cases (the first counts), "depends": null.
+        (mods / "every/mod.json").write_bytes('{"leagues": "listed", "LEAGUES": "all", "depends": null}'.encode("utf-16"))
+        systems, _ = data.catalogue(self.modules, self.leagues, mods)
+        self.assertEqual(systems["every"], {"path": "every", "depends": [], "mod": True})
+        # A league mod that depends on a mod of every league can be ticked.
+        self.write(mods / "lib/mod.json", {})
+        self.write(mods / "uses/mod.json", {"leagues": "listed", "depends": ["lib"]})
+        run(choose("Standard", ["Custom/Bots", "idols", "uses"]))
+        # A mod's league that cannot be read, or has no Source/ or Binaries/, is not there; the others still save.
+        self.write(mods / "uses/Leagues/Broken/league.json", {"name": "Broken", "creatable": "yes"})
+        (mods / "uses/Leagues/Broken/Source").mkdir()
+        self.write(mods / "uses/Leagues/NoSource/league.json", {"name": "NoSource"})
+        self.write(mods / "uses/Leagues/NoSource/modules.json", {"modules": ["Core/Game"]})
+        self.assertFalse({"Broken", "NoSource"} & {p["name"] for p in data.catalogue(self.modules, self.leagues, mods)[1]})
+        run(choose("Standard", ["Custom/Bots", "idols"]))
+        # A listed mod named exactly as a league's folder does not load.
+        self.write(mods / "Hardcore/mod.json", {"leagues": "listed"})
+        self.assertNotIn("hardcore", data.catalogue(self.modules, self.leagues, mods)[0])
         # A mod turned off is no longer there, and what was reviewed has changed.
         before = data.review(self.modules, self.leagues, self.choices, mods)
         (mods / "mod-state.txt").write_text("idols off\n", encoding="utf-8")

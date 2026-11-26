@@ -3924,6 +3924,9 @@ Switching to it builds and runs that code on this computer with your rights, liv
   <data name="Text_6707ce0b6be2" xml:space="preserve">
     <value>that character name is taken</value>
   </data>
+  <data name="Text_6712fcd28cdc" xml:space="preserve">
+    <value>{0} (mod not on)</value>
+  </data>
   <data name="Text_67181a386da0" xml:space="preserve">
     <value>That folder is a LocalExile release</value>
   </data>
@@ -4805,6 +4808,9 @@ Switching to it builds and runs that code on this computer with your rights, liv
   </data>
   <data xml:space="preserve" name="Text_808fc010f815">
     <value>{0}: {1} at backup</value>
+  </data>
+  <data name="Text_809765cacb05" xml:space="preserve">
+    <value>This league needs this mod. LocalExile does not load the league while the mod is not installed or is turned off. Untick it to take it off the list.</value>
   </data>
   <data xml:space="preserve" name="Text_80d16534322e">
     <value>BuildMod completed.</value>

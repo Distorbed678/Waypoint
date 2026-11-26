@@ -3924,6 +3924,9 @@
   <data name="Text_6707ce0b6be2" xml:space="preserve">
     <value>该角色名称已被占用</value>
   </data>
+  <data name="Text_6712fcd28cdc" xml:space="preserve">
+    <value>{0}（模组未启用）</value>
+  </data>
   <data name="Text_67181a386da0" xml:space="preserve">
     <value>该文件夹是 LocalExile 发行版</value>
   </data>
@@ -4805,6 +4808,9 @@
   </data>
   <data name="Text_808fc010f815" xml:space="preserve">
     <value>{0}：{1}（备份时）</value>
+  </data>
+  <data name="Text_809765cacb05" xml:space="preserve">
+    <value>此联赛需要该模组。在该模组未安装或已停用时，LocalExile 不会加载此联赛。取消勾选即可将其从列表中移除。</value>
   </data>
   <data name="Text_80d16534322e" xml:space="preserve">
     <value>模组已构建。</value>

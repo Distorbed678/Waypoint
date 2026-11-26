@@ -3924,6 +3924,9 @@
   <data name="Text_6707ce0b6be2" xml:space="preserve">
     <value>это имя персонажа уже занято</value>
   </data>
+  <data name="Text_6712fcd28cdc" xml:space="preserve">
+    <value>{0} (мод не включён)</value>
+  </data>
   <data name="Text_67181a386da0" xml:space="preserve">
     <value>Эта папка — релиз LocalExile</value>
   </data>
@@ -4805,6 +4808,9 @@
   </data>
   <data xml:space="preserve" name="Text_808fc010f815">
     <value>{0}: {1} при копировании</value>
+  </data>
+  <data name="Text_809765cacb05" xml:space="preserve">
+    <value>Этой лиге нужен этот мод. LocalExile не загружает лигу, пока мод не установлен или выключен. Снимите флажок, чтобы убрать его из списка.</value>
   </data>
   <data xml:space="preserve" name="Text_80d16534322e">
     <value>Мод собран.</value>

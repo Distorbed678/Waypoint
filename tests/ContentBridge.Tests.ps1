@@ -83,6 +83,9 @@ try {
     $ModStaged=StageLeague '{"Standard":{"add":["../outside"],"remove":[]}}'
     Refused { Save-ContentFile $snapshot } 'adapter rejects escaping module paths'
     # A mod of the leagues that list it is ticked by its id; the adapter reads the mods' folder as the servers do.
+    Check (-not (Get-ContentEnvironment).Mods) 'a server without listed mods has no mods read for its leagues'
+    Set-Content -LiteralPath (At 'src/GameServer.Core/Accounts/LeagueCatalog.cs') '// Game_LEAGUE_MODULES ModFolders.On'
+    $ModStaged=StageLeague '{"Standard":{"add":["Optional/Example"],"remove":[]}}'
     $ModStaged=StageLeague '{"Standard":{"add":["Optional/Example","bots"],"remove":[]}}'
     Refused { Save-ContentFile $snapshot } 'a mod that is not installed is not a new entry of a league'
     New-Item -ItemType Directory -Force (At 'Mods/Binaries/bots') | Out-Null

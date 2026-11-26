@@ -1277,9 +1277,13 @@ module the league does not ship with (the Currency Exchange in an SSF or a Ruthl
 - **A league that a mod brings** (its `Leagues/<Name>/` folder, read while the mod is on, after the checkout's own: the
   first of a name stays) is a league like the others, and its details say which mod it is from. Its module choices are
   edited and saved as any league's; it is not hidden or shown here and its settings are not edited here, because its
-  files are the mod's and an update of the mod replaces them. A league made from one lists that league's mods as
-  modules. A league whose `league.json` names a mod that is not on, and still lists it, is shown as not offered:
-  LocalExile does not load it.
+  files are the mod's and an update of the mod replaces them. A league made from one keeps that league's mods that
+  stay ticked as its own (`league.json` `"mods"`). A league whose `league.json` names a mod that is not on, and still
+  lists it, is shown as not offered (LocalExile does not load it), with that mod's row as **{id} (mod not on)**. A mod's
+  league that cannot be read is left out, as LocalExile leaves it out; a new league is not named as an installed mod.
+  All of this needs a LocalExile that has listed mods (its catalog's `ModFolders.On`; a release above 0.6.0); with an
+  older one, or `Game_MODS=0`, Waypoint reads no mod here.
+- A league's mod may depend on a mod of every league that is on.
 - **A listed module that is not installed** (a typo in a hand edit, a module taken away since) shows as
   **{path} (not installed)**, ticked. LocalExile skips it and loads the league, so the league stays editable; unticking
   the entry takes it off the list. It is never required, and a new one that is not installed is refused. Save, discard and validation feedback stay visible below the scrolling panel. Details, the card
