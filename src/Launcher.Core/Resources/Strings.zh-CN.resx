@@ -480,6 +480,9 @@
   <data name="Text_0cf0462b32ac" xml:space="preserve">
     <value>{0} 不是空的。请选择空文件夹或新文件夹。</value>
   </data>
+  <data name="Text_0d0717954ac3" xml:space="preserve">
+    <value>Steam 的游戏库</value>
+  </data>
   <data name="Text_0d0d25a58963" xml:space="preserve">
     <value>重新获取拉取请求 #{0}：获取其最新提交，强制推送后同样适用</value>
   </data>

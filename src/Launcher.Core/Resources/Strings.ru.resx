@@ -480,6 +480,9 @@
   <data name="Text_0cf0462b32ac" xml:space="preserve">
     <value>{0} не пуста. Выберите пустую или новую папку.</value>
   </data>
+  <data name="Text_0d0717954ac3" xml:space="preserve">
+    <value>библиотеки Steam</value>
+  </data>
   <data name="Text_0d0d25a58963" xml:space="preserve">
     <value>Заново получает запрос на слияние #{0}: его новейшие коммиты, в том числе после force-push</value>
   </data>

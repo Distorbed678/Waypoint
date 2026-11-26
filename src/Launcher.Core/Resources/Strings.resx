@@ -480,6 +480,9 @@
   <data name="Text_0cf0462b32ac" xml:space="preserve">
     <value>{0} is not empty. Choose an empty folder or a new one.</value>
   </data>
+  <data name="Text_0d0717954ac3" xml:space="preserve">
+    <value>Steam's libraries</value>
+  </data>
   <data name="Text_0d0d25a58963" xml:space="preserve">
     <value>Fetches pull request #{0} again: its newest commits, also after a force-push</value>
   </data>
