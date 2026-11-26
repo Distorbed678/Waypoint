@@ -657,6 +657,9 @@
   <data name="Text_10d911351fa4" xml:space="preserve">
     <value>航行</value>
   </data>
+  <data name="Text_10dcdca58301" xml:space="preserve">
+    <value>颜色（#RRGGBB）</value>
+  </data>
   <data name="Text_10dee8798467" xml:space="preserve">
     <value>正在构建…</value>
   </data>
@@ -1795,6 +1798,9 @@
   </data>
   <data name="Text_2deea4664d23" xml:space="preserve">
     <value>次要文本</value>
+  </data>
+  <data name="Text_2e0444630388" xml:space="preserve">
+    <value>跟随桌面：{0}</value>
   </data>
   <data name="Text_2e07253d4cbb" xml:space="preserve">
     <value>正在提取游戏数据</value>
@@ -7697,6 +7703,9 @@ Gateway 最近报告的事件。打开 Gateway 输出查看详情。</value>
   </data>
   <data name="Text_cd4b01b8b2e8" xml:space="preserve">
     <value>已导入 {0}，含 {1} 个词缀。“保存”可将其保留在列表中。</value>
+  </data>
+  <data name="Text_cd55a9d95751" xml:space="preserve">
+    <value>{0} · {1}</value>
   </data>
   <data name="Text_cd77503a4522" xml:space="preserve">
     <value>命令已复制到剪贴板，但它有 {0} 个字符，而游戏聊天框最多只能输入 {1} 个。请改用“发放物品”。</value>

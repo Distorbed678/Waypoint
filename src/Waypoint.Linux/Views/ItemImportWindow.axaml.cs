@@ -89,7 +89,7 @@ partial class ItemImportWindow : FormWindow
     void Show(string text, string brush, MaterialIconKind icon)
     {
         Summary.Text = text;
-        Summary.Foreground = SummaryIcon.Foreground = global::Waypoint.Theme.Brush(brush);
+        Summary.Foreground = SummaryIcon.Foreground = AppTheme.Brush(brush);
         SummaryIcon.Kind = icon;
     }
 
@@ -97,13 +97,13 @@ partial class ItemImportWindow : FormWindow
     {
         var (icon, brush) = line.Status switch
         {
-            ImportStatus.Mod => (MaterialIconKind.CheckCircleOutline, global::Waypoint.Theme.Brush("Shell.Good")),
-            ImportStatus.Used => (MaterialIconKind.Check, global::Waypoint.Theme.Brush("Shell.TextSecondary")),
-            ImportStatus.Unmatched => (MaterialIconKind.AlertCircleOutline, global::Waypoint.Theme.Brush("Shell.Error")),
-            _ => (MaterialIconKind.Minus, global::Waypoint.Theme.Brush("Shell.TextSecondary")),
+            ImportStatus.Mod => (MaterialIconKind.CheckCircleOutline, AppTheme.Brush("Shell.Good")),
+            ImportStatus.Used => (MaterialIconKind.Check, AppTheme.Brush("Shell.TextSecondary")),
+            ImportStatus.Unmatched => (MaterialIconKind.AlertCircleOutline, AppTheme.Brush("Shell.Error")),
+            _ => (MaterialIconKind.Minus, AppTheme.Brush("Shell.TextSecondary")),
         };
         IBrush back = Brushes.Transparent;
-        if (line.Status == ImportStatus.Unmatched && global::Waypoint.Theme.Brush("Shell.Error") is ISolidColorBrush error)
+        if (line.Status == ImportStatus.Unmatched && AppTheme.Brush("Shell.Error") is ISolidColorBrush error)
             back = new SolidColorBrush(error.Color) { Opacity = .14 };
         return new ImportRow(line.Number, (line.Number + 1).ToString(), line.Text, line.Note, icon, brush, back, line.Status == ImportStatus.Skipped ? .55 : 1);
     }

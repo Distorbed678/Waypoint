@@ -657,6 +657,9 @@
   <data name="Text_10d911351fa4" xml:space="preserve">
     <value>Voyage</value>
   </data>
+  <data name="Text_10dcdca58301" xml:space="preserve">
+    <value>Color (#RRGGBB)</value>
+  </data>
   <data name="Text_10dee8798467" xml:space="preserve">
     <value>Building…</value>
   </data>
@@ -1795,6 +1798,9 @@ Change location above to choose somewhere else.</value>
   </data>
   <data xml:space="preserve" name="Text_2deea4664d23">
     <value>Secondary text</value>
+  </data>
+  <data name="Text_2e0444630388" xml:space="preserve">
+    <value>Following the desktop: {0}</value>
   </data>
   <data name="Text_2e07253d4cbb" xml:space="preserve">
     <value>Extracting the game data</value>
@@ -7697,6 +7703,9 @@ Client: {2}</value>
   </data>
   <data name="Text_cd4b01b8b2e8" xml:space="preserve">
     <value>Imported {0} with {1} modifiers. Save keeps it in the list.</value>
+  </data>
+  <data name="Text_cd55a9d95751" xml:space="preserve">
+    <value>{0} · {1}</value>
   </data>
   <data name="Text_cd77503a4522" xml:space="preserve">
     <value>The command is on the clipboard, but it is {0} characters and the game's chat box takes {1}. Use Give item instead.</value>

@@ -20,6 +20,8 @@
     <Using Include="Launcher.Core" />
     <Using Include="Avalonia.Controls.Window" Alias="Window" />
     <AvaloniaResource Include="..\..\branding\waypoint-192.png" Link="waypoint-192.png" />
+    <!-- The bundled reading font and its licence, which travels with it (as in Waypoint.exe). -->
+    <AvaloniaResource Include="..\Waypoint\Fonts\*.otf;..\Waypoint\Fonts\OFL.txt" Link="Fonts\%(Filename)%(Extension)" />
     <!-- DepotDownloader's official Linux release, unchanged, for the game client from Steam (DepotTool.Bundled), as
          Waypoint.exe carries the Windows one. tools/Get-DepotDownloader.ps1 -Linux fetches it and checks its hash; a build
          without it fetches the same release when it is first needed. -->

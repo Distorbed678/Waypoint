@@ -84,11 +84,11 @@ partial class ItemCrafterWindow : FormWindow
         KeyDown += WindowKeyDown;
         Opened += async (_, _) => await LoadCatalog();
         L.Current.PropertyChanged += LanguageChanged;
-        global::Waypoint.Theme.Changed += ThemeChanged;
+        AppTheme.Changed += ThemeChanged;
         Closed += (_, _) =>
         {
             L.Current.PropertyChanged -= LanguageChanged;
-            global::Waypoint.Theme.Changed -= ThemeChanged;
+            AppTheme.Changed -= ThemeChanged;
         };
     }
 
@@ -539,8 +539,8 @@ partial class ItemCrafterWindow : FormWindow
         {
             for (int i = 0; i < group; i++, at++)
             {
-                if (i > 0) panel.Children.Add(new Rectangle { Width = size / 2, Height = 3, Fill = global::Waypoint.Theme.Brush("Shell.TextSecondary"), VerticalAlignment = VerticalAlignment.Center });
-                panel.Children.Add(new Ellipse { Width = size, Height = size, Fill = new SolidColorBrush(SocketColour(colours[at])), Stroke = global::Waypoint.Theme.Brush("Shell.Border"), StrokeThickness = 1 });
+                if (i > 0) panel.Children.Add(new Rectangle { Width = size / 2, Height = 3, Fill = AppTheme.Brush("Shell.TextSecondary"), VerticalAlignment = VerticalAlignment.Center });
+                panel.Children.Add(new Ellipse { Width = size, Height = size, Fill = new SolidColorBrush(SocketColour(colours[at])), Stroke = AppTheme.Brush("Shell.Border"), StrokeThickness = 1 });
             }
             panel.Children.Add(new Border { Width = size / 2 });
         }
@@ -654,7 +654,7 @@ partial class ItemCrafterWindow : FormWindow
             }
         int limit = AffixLimit;
         AffixCount.Text = L.Text("prefixes {0}/{1} · suffixes {2}/{3}", prefixes, limit, suffixes, limit);
-        AffixCount.Foreground = prefixes > limit || suffixes > limit ? global::Waypoint.Theme.Brush("Shell.Warning") : global::Waypoint.Theme.Brush("Shell.TextSecondary");
+        AffixCount.Foreground = prefixes > limit || suffixes > limit ? AppTheme.Brush("Shell.Warning") : AppTheme.Brush("Shell.TextSecondary");
         for (int index = 0; index < _item.Mods.Count; index++)
         {
             var m = _item.Mods[index];
@@ -670,8 +670,8 @@ partial class ItemCrafterWindow : FormWindow
         var catalog = _catalog!;
         var card = new Border
         {
-            Background = global::Waypoint.Theme.Brush("Shell.RowAlt"),
-            BorderBrush = clash ? global::Waypoint.Theme.Brush("Shell.Warning") : global::Waypoint.Theme.Brush("Shell.Border"),
+            Background = AppTheme.Brush("Shell.RowAlt"),
+            BorderBrush = clash ? AppTheme.Brush("Shell.Warning") : AppTheme.Brush("Shell.Border"),
             BorderThickness = new Thickness(1),
             CornerRadius = new CornerRadius(6),
             Padding = new Thickness(10, 8, 6, 8),
@@ -750,7 +750,7 @@ partial class ItemCrafterWindow : FormWindow
 
         var sliders = new StackPanel();
         body.Children.Add(sliders);
-        if (clash) sliders.Children.Add(new TextBlock { Text = L.Text("Another modifier of the same group is on the item: the game would not roll both."), Foreground = global::Waypoint.Theme.Brush("Shell.Warning"), FontSize = 11.5, TextWrapping = TextWrapping.Wrap });
+        if (clash) sliders.Children.Add(new TextBlock { Text = L.Text("Another modifier of the same group is on the item: the game would not roll both."), Foreground = AppTheme.Brush("Shell.Warning"), FontSize = 11.5, TextWrapping = TextWrapping.Wrap });
         for (int i = 0; i < mod.Stats.Count; i++)
         {
             var stat = mod.Stats[i];
@@ -763,7 +763,7 @@ partial class ItemCrafterWindow : FormWindow
             {
                 var themeRow = new DockPanel { Margin = new Thickness(0, 2, 6, 2) };
                 var themeLabel = new TextBlock { Text = L.Text("Small passives grant"), Width = 190, FontSize = 11, VerticalAlignment = VerticalAlignment.Center, TextTrimming = TextTrimming.CharacterEllipsis, TextWrapping = TextWrapping.NoWrap,
-                    Foreground = global::Waypoint.Theme.Brush("Shell.TextSecondary") };
+                    Foreground = AppTheme.Brush("Shell.TextSecondary") };
                 DockPanel.SetDock(themeLabel, Dock.Left);
                 themeRow.Children.Add(themeLabel);
                 var themeBox = new ComboBox { FontSize = 12, VerticalAlignment = VerticalAlignment.Center };
@@ -787,7 +787,7 @@ partial class ItemCrafterWindow : FormWindow
             }
             var row = new DockPanel { Margin = new Thickness(0, 2, 6, 0) };
             var label = new TextBlock { Text = _display!.StatLabel(stat), Width = 190, FontSize = 11, TextTrimming = TextTrimming.CharacterEllipsis, TextWrapping = TextWrapping.NoWrap,
-                VerticalAlignment = VerticalAlignment.Center, Foreground = global::Waypoint.Theme.Brush("Shell.TextSecondary") };
+                VerticalAlignment = VerticalAlignment.Center, Foreground = AppTheme.Brush("Shell.TextSecondary") };
             ToolTip.SetTip(label, stat.Id);
             DockPanel.SetDock(label, Dock.Left);
             row.Children.Add(label);
@@ -797,7 +797,7 @@ partial class ItemCrafterWindow : FormWindow
             row.Children.Add(box);
             if (min == max)
             {
-                row.Children.Add(new TextBlock { Text = L.Text("fixed"), FontSize = 11, Margin = new Thickness(8, 0, 0, 0), Foreground = global::Waypoint.Theme.Brush("Shell.TextSecondary"), VerticalAlignment = VerticalAlignment.Center });
+                row.Children.Add(new TextBlock { Text = L.Text("fixed"), FontSize = 11, Margin = new Thickness(8, 0, 0, 0), Foreground = AppTheme.Brush("Shell.TextSecondary"), VerticalAlignment = VerticalAlignment.Center });
             }
             else
             {
@@ -861,7 +861,7 @@ partial class ItemCrafterWindow : FormWindow
     /// colour scheme, so they are not theme colours.</summary>
     static IBrush GameColour(string what)
     {
-        var background = global::Waypoint.Theme.Brush("Shell.Background") is ISolidColorBrush b ? b.Color : Colors.White;
+        var background = AppTheme.Brush("Shell.Background") is ISolidColorBrush b ? b.Color : Colors.White;
         Color color = what switch
         {
             "magic" or "mod" => Color.FromRgb(0x88, 0x88, 0xFF),
@@ -870,7 +870,7 @@ partial class ItemCrafterWindow : FormWindow
             "crafted" => Color.FromRgb(0xB4, 0xB4, 0xFF),
             "corrupted" => Color.FromRgb(0xD2, 0x00, 0x00),
             "fractured" => Color.FromRgb(0xA2, 0x91, 0x62),
-            _ => global::Waypoint.Theme.Brush("Shell.Text") is ISolidColorBrush text ? text.Color : Colors.White,
+            _ => AppTheme.Brush("Shell.Text") is ISolidColorBrush text ? text.Color : Colors.White,
         };
         return new SolidColorBrush(ThemePalette.Ensure(color, [background], 4.5));
     }
@@ -897,8 +897,8 @@ partial class ItemCrafterWindow : FormWindow
         if (_base is null || _catalog is null)
         {
             PreviewHeader.Background = Brushes.Transparent;
-            PreviewCard.BorderBrush = global::Waypoint.Theme.Brush("Shell.Border");
-            PreviewBody.Children.Add(new TextBlock { Text = L.Text("The item shows here as you make it."), Foreground = global::Waypoint.Theme.Brush("Shell.TextSecondary"), TextWrapping = TextWrapping.Wrap });
+            PreviewCard.BorderBrush = AppTheme.Brush("Shell.Border");
+            PreviewBody.Children.Add(new TextBlock { Text = L.Text("The item shows here as you make it."), Foreground = AppTheme.Brush("Shell.TextSecondary"), TextWrapping = TextWrapping.Wrap });
             return;
         }
         var rarity = GameColour(_item.Rarity == "normal" ? "normal" : _item.Rarity);
@@ -917,7 +917,7 @@ partial class ItemCrafterWindow : FormWindow
 
         void Line(string text, IBrush? brush = null, bool center = true, double size = 13) => PreviewBody.Children.Add(new TextBlock
         {
-            Text = text, Foreground = brush ?? global::Waypoint.Theme.Brush("Shell.TextSecondary"), FontSize = size, TextWrapping = TextWrapping.Wrap,
+            Text = text, Foreground = brush ?? AppTheme.Brush("Shell.TextSecondary"), FontSize = size, TextWrapping = TextWrapping.Wrap,
             TextAlignment = center ? TextAlignment.Center : TextAlignment.Left, Margin = new Thickness(0, 1, 0, 1),
         });
         void Separator()
@@ -927,9 +927,9 @@ partial class ItemCrafterWindow : FormWindow
         }
 
         Line(ClassName(_base.Class));
-        if (_item.Quality > 0) Line(L.Text("Quality: +{0}%", _item.Quality), global::Waypoint.Theme.Brush("Shell.Text"));
+        if (_item.Quality > 0) Line(L.Text("Quality: +{0}%", _item.Quality), AppTheme.Brush("Shell.Text"));
         Separator();
-        Line(L.Text("Item Level: {0}", _item.ItemLevel), global::Waypoint.Theme.Brush("Shell.Text"));
+        Line(L.Text("Item Level: {0}", _item.ItemLevel), AppTheme.Brush("Shell.Text"));
         string[] names = [L.Text("Str"), L.Text("Dex"), L.Text("Int")];
         var requirements = _base.Requirements.Select((r, i) => r > 0 ? $"{names[i]} {r}" : null).OfType<string>().ToList();
         if (requirements.Count > 0) Line(L.Text("Requires {0}", string.Join(", ", requirements)));
@@ -963,10 +963,10 @@ partial class ItemCrafterWindow : FormWindow
         if (explicits.Count > 0) { Separator(); Mods(explicits); }
 
         var marks = new List<(string, IBrush)>();
-        foreach (string influence in Influences.Where(_item.States.Contains)) marks.Add((L.Text("{0} Item", StateName(influence)), global::Waypoint.Theme.Brush("Shell.Text")));
-        if (_item.States.Contains("split")) marks.Add((L.Text("Split"), global::Waypoint.Theme.Brush("Shell.Text")));
-        if (_item.States.Contains("synthesised")) marks.Add((L.Text("Synthesised Item"), global::Waypoint.Theme.Brush("Shell.Text")));
-        if (_item.States.Contains("mirrored")) marks.Add((L.Text("Mirrored"), global::Waypoint.Theme.Brush("Shell.Text")));
+        foreach (string influence in Influences.Where(_item.States.Contains)) marks.Add((L.Text("{0} Item", StateName(influence)), AppTheme.Brush("Shell.Text")));
+        if (_item.States.Contains("split")) marks.Add((L.Text("Split"), AppTheme.Brush("Shell.Text")));
+        if (_item.States.Contains("synthesised")) marks.Add((L.Text("Synthesised Item"), AppTheme.Brush("Shell.Text")));
+        if (_item.States.Contains("mirrored")) marks.Add((L.Text("Mirrored"), AppTheme.Brush("Shell.Text")));
         if (_item.States.Contains("corrupted")) marks.Add((L.Text("Corrupted"), GameColour("corrupted")));
         if (marks.Count > 0)
         {
@@ -1255,7 +1255,7 @@ partial class ItemCrafterWindow : FormWindow
     {
         StatusText.Text = text;
         ToolTip.SetTip(StatusText, text);
-        StatusText.Foreground = global::Waypoint.Theme.Brush(error ? "Shell.Error" : "Shell.TextSecondary");
+        StatusText.Foreground = AppTheme.Brush(error ? "Shell.Error" : "Shell.TextSecondary");
         StatusIcon.Kind = error ? MaterialIconKind.AlertCircleOutline : MaterialIconKind.InformationOutline;
         StatusIcon.Foreground = StatusText.Foreground;
     }

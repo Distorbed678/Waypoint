@@ -63,7 +63,7 @@ sealed class MapCanvas : Control
         Fit();
     }
 
-    static Color Colour(string key) => global::Waypoint.Theme.Brush(key) is ISolidColorBrush brush ? brush.Color : Colors.Gray;
+    static Color Colour(string key) => AppTheme.Brush(key) is ISolidColorBrush brush ? brush.Color : Colors.Gray;
 
     internal void SetLayers(MapLayerSettings layers)
     {
@@ -120,25 +120,25 @@ sealed class MapCanvas : Control
 
     public override void Render(DrawingContext dc)
     {
-        dc.DrawRectangle(global::Waypoint.Theme.Brush("Shell.Background"), null, new Rect(Bounds.Size));
+        dc.DrawRectangle(AppTheme.Brush("Shell.Background"), null, new Rect(Bounds.Size));
         if (_map is null || _walk is null) return;
         var projection = Projection();
         using (dc.PushTransform(projection))
         {
             if (_layers.Walkability) dc.DrawImage(_walk, new Rect(0, 0, _walk.PixelSize.Width, _walk.PixelSize.Height), new Rect(0, 0, _map.Width, _map.Height));
-            else dc.DrawRectangle(global::Waypoint.Theme.Brush("Shell.Panel"), null, new Rect(0, 0, _map.Width, _map.Height));
-            var grid = new Pen(global::Waypoint.Theme.Brush("Shell.Border"), 0.5 / _scale);
+            else dc.DrawRectangle(AppTheme.Brush("Shell.Panel"), null, new Rect(0, 0, _map.Width, _map.Height));
+            var grid = new Pen(AppTheme.Brush("Shell.Border"), 0.5 / _scale);
             if (_layers.Grid)
             {
                 for (int x = 0; x <= _map.Width; x++) dc.DrawLine(grid, new Point(x, 0), new Point(x, _map.Height));
                 for (int y = 0; y <= _map.Height; y++) dc.DrawLine(grid, new Point(0, y), new Point(_map.Width, y));
             }
             if (Highlight is not null)
-                foreach (var tile in _map.Tiles.Where(t => t.Path == Highlight)) dc.DrawRectangle(global::Waypoint.Theme.Brush("Shell.Accent"), null, new Rect(tile.X, tile.Y, 1, 1));
+                foreach (var tile in _map.Tiles.Where(t => t.Path == Highlight)) dc.DrawRectangle(AppTheme.Brush("Shell.Accent"), null, new Rect(tile.X, tile.Y, 1, 1));
         }
         if (_layers.TeleportLinks)
         {
-            var linkPen = new Pen(global::Waypoint.Theme.Brush("Shell.TextSecondary"), 1.5) { DashStyle = DashStyle.Dash };
+            var linkPen = new Pen(AppTheme.Brush("Shell.TextSecondary"), 1.5) { DashStyle = DashStyle.Dash };
             foreach (var link in MapNavigation.TeleportLinks(_map))
                 dc.DrawLine(linkPen, projection.Transform(new Point(link.X / 23.0, link.Y / 23.0)),
                     projection.Transform(new Point(link.TargetX / 23.0, link.TargetY / 23.0)));
@@ -148,10 +148,10 @@ sealed class MapCanvas : Control
             var at = projection.Transform(new Point(marker.X / 23.0, marker.Y / 23.0));
             if (IconGeometry(marker.Icon) is not { } geometry) return;
             if (SelectedMarker == marker.Key)
-                dc.DrawEllipse(null, new Pen(global::Waypoint.Theme.Brush("Shell.Text"), 2.5), at, 14, 14);
-            dc.DrawEllipse(global::Waypoint.Theme.Brush("Shell.Background"), marker.Framed ? new Pen(global::Waypoint.Theme.Brush(marker.Brush), 1.5) : null, at, 10, 10);
+                dc.DrawEllipse(null, new Pen(AppTheme.Brush("Shell.Text"), 2.5), at, 14, 14);
+            dc.DrawEllipse(AppTheme.Brush("Shell.Background"), marker.Framed ? new Pen(AppTheme.Brush(marker.Brush), 1.5) : null, at, 10, 10);
             using (dc.PushTransform(Matrix.CreateScale(16.0 / 24, 16.0 / 24) * Matrix.CreateTranslation(at.X - 8, at.Y - 8)))
-                dc.DrawGeometry(global::Waypoint.Theme.Brush(marker.Brush), null, geometry);
+                dc.DrawGeometry(AppTheme.Brush(marker.Brush), null, geometry);
         }
         foreach (var marker in _markers.Where(m => m.Key != SelectedMarker)) Mark(marker);
         if (SelectedMarker is { } selected && _markers.FirstOrDefault(m => m.Key == selected) is { } active) Mark(active);

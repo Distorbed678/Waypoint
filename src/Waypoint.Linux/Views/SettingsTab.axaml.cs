@@ -35,6 +35,7 @@ partial class SettingsTab : UserControl
             LanguageChoices.Children.Add(choice);
         }
         L.Current.PropertyChanged += (_, _) => Show();
+        AppTheme.Changed += ShowAppearance;
         L.Current.PropertyChanged += (_, _) => ShowPaths();
         Show();
         ShowPaths();
@@ -44,6 +45,7 @@ partial class SettingsTab : UserControl
     {
         _loading = true;
         ShowTexts();
+        ShowAppearance();
         foreach (RadioButton choice in LanguageChoices.Children) choice.IsChecked = (string)choice.Tag! == L.Current.Language;
         StopServices.IsChecked = S.StopServicesOnExit;
         LeaveServices.IsChecked = !S.StopServicesOnExit;
@@ -73,6 +75,21 @@ partial class SettingsTab : UserControl
         CheckoutGroup.IsVisible = Editions.Advanced(S) && !Repo.IsInstall;
         _loading = false;
     }
+
+    void ShowAppearance()
+    {
+        var value = AppTheme.Current;
+        string scheme = value.Scheme == "custom" ? L.Text("Custom") : L.Text(ThemePalette.Schemes.First(s => s.Id == value.Scheme).Name);
+        AppearanceSummary.Text = L.Text("{0} · {1}", scheme, L.Text(value.Mode));
+    }
+
+    void ChangeAppearance(object? sender, RoutedEventArgs e) =>
+        new AppearanceDialog(ViewTools.Owner(this), AppTheme.Current, value =>
+        {
+            S.Appearance = ThemePalette.Normalize(value);
+            S.Save();
+            AppTheme.Apply(S.Appearance);
+        }).ShowDialog();
 
     void ShowTexts()
     {
