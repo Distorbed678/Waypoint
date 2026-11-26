@@ -1384,6 +1384,9 @@ Modules and Leagues ask before discarding a draft when switching selection or re
 hash, so another tool's changes require a refresh. Changes use the shared workspace lock and the normal optional save backup.
 Previous configuration files are copied to Waypoint's `config-history/<id>/` before replacement, separately from save backups.
 Reset to defaults asks first. Mod values use `data/mods/`, module values `data/modules/`, and league values `data/leagues/`.
+A mod that was a module (such as `playerbots` or `idols`) shows its old `data/modules/<Id>.json` values until it has its
+own file, as LocalExile moves them when it next loads its mods; a save before that writes them to `data/mods/<id>.json`
+with the change.
 
 ### Backups
 
