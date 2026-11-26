@@ -4194,6 +4194,9 @@
   <data name="Text_6f0d66ca5326" xml:space="preserve">
     <value>异能固定词缀</value>
   </data>
+  <data name="Text_6f1a81da4fbf" xml:space="preserve">
+    <value>Steam 下载仅支持 64 位 Windows 和 Linux。</value>
+  </data>
   <data name="Text_6f1f1b23d3fd" xml:space="preserve">
     <value>在这里它只提供一种游戏模式的规则，不包含该模式自身的技能、商人和任务奖励。</value>
   </data>

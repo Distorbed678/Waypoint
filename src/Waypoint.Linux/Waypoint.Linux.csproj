@@ -20,6 +20,11 @@
     <Using Include="Launcher.Core" />
     <Using Include="Avalonia.Controls.Window" Alias="Window" />
     <AvaloniaResource Include="..\..\branding\waypoint-192.png" Link="waypoint-192.png" />
+    <!-- DepotDownloader's official Linux release, unchanged, for the game client from Steam (DepotTool.Bundled), as
+         Waypoint.exe carries the Windows one. tools/Get-DepotDownloader.ps1 -Linux fetches it and checks its hash; a build
+         without it fetches the same release when it is first needed. -->
+    <EmbeddedResource Include="..\..\tools\bundled\DepotDownloader-linux-x64.zip" LogicalName="Bundled/DepotDownloader.zip"
+                      Condition="Exists('..\..\tools\bundled\DepotDownloader-linux-x64.zip')" />
     <ProjectReference Include="..\Launcher.Core\Launcher.Core.csproj" />
     <PackageReference Include="Avalonia" Version="12.1.4" />
     <PackageReference Include="Avalonia.Desktop" Version="12.1.4" />

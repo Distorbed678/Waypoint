@@ -4194,6 +4194,9 @@
   <data name="Text_6f0d66ca5326" xml:space="preserve">
     <value>Жуткие собственные свойства</value>
   </data>
+  <data name="Text_6f1a81da4fbf" xml:space="preserve">
+    <value>Загрузка из Steam работает только в 64-битных Windows и Linux.</value>
+  </data>
   <data name="Text_6f1f1b23d3fd" xml:space="preserve">
     <value>Здесь он даёт только правила режима игры, без собственных умений, торговцев и наград за задания этого режима.</value>
   </data>

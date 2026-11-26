@@ -4194,6 +4194,9 @@ Switching to it builds and runs that code on this computer with your rights, liv
   <data name="Text_6f0d66ca5326" xml:space="preserve">
     <value>Eldritch implicits</value>
   </data>
+  <data name="Text_6f1a81da4fbf" xml:space="preserve">
+    <value>The Steam download works on 64-bit Windows and Linux only.</value>
+  </data>
   <data name="Text_6f1f1b23d3fd" xml:space="preserve">
     <value>Here it gives the rules of a game mode only, without that mode's own skills, vendors and quest rewards.</value>
   </data>
