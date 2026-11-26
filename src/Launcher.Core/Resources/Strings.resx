@@ -2151,6 +2151,9 @@ This checkout has modified tracked files.</value>
   <data name="Text_378c3757374c" xml:space="preserve">
     <value>Wild: any modifier on any gear</value>
   </data>
+  <data name="Text_37a50d180bfc" xml:space="preserve">
+    <value>From the mod: {0}</value>
+  </data>
   <data name="Text_37a8eec1ce19" xml:space="preserve">
     <value>default</value>
   </data>
@@ -8967,6 +8970,9 @@ Dependencies: {2}
   </data>
   <data name="Text_f18e2bb0aa10" xml:space="preserve">
     <value>Use separate game settings</value>
+  </data>
+  <data name="Text_f1959987d67e" xml:space="preserve">
+    <value>A league that a mod brings can't be hidden or shown here: an update of the mod would undo it.</value>
   </data>
   <data name="Text_f1b7505afa5c" xml:space="preserve">
     <value>Social</value>

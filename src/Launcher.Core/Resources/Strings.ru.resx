@@ -2151,6 +2151,9 @@
   <data name="Text_378c3757374c" xml:space="preserve">
     <value>Любое свойство на любом снаряжении</value>
   </data>
+  <data name="Text_37a50d180bfc" xml:space="preserve">
+    <value>Из мода: {0}</value>
+  </data>
   <data name="Text_37a8eec1ce19" xml:space="preserve">
     <value>основная</value>
   </data>
@@ -8967,6 +8970,9 @@
   </data>
   <data name="Text_f18e2bb0aa10" xml:space="preserve">
     <value>Использовать отдельные настройки игры</value>
+  </data>
+  <data name="Text_f1959987d67e" xml:space="preserve">
+    <value>Лигу, которую добавляет мод, здесь нельзя скрыть или показать: обновление мода отменит это изменение.</value>
   </data>
   <data name="Text_f1b7505afa5c" xml:space="preserve">
     <value>Общение</value>

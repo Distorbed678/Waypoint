@@ -70,25 +70,70 @@ def manifests(folder, filename):
                 pending.append((child, depth + 1))
 
 
-def review(modules, leagues, choices):
+def mod_folders(mods):
+    """The folders of the installed mods that hold a mod.json, by name: at most 512, as GameSystems reads them."""
+    if mods is None or not physical(mods).is_dir():
+        return []
+    folders = sorted((f for f in mods.iterdir() if f.is_dir()), key=lambda f: f.name)[:512]
+    return [f for f in folders if re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,127}", f.name) and (f / "mod.json").is_file()]
+
+
+def on_mods(mods):
+    """The mods that are on, as LocalExile reads them (its ModFolders.On) and as GameSystems.OnMods does: a readable
+    mod.json, not turned off by it or by mod-state.txt. Each is (id, folder, mod.json with lower-case keys)."""
+    folders = mod_folders(mods)
+    choices = {}
+    state = mods / "mod-state.txt" if folders else None
+    if state is not None and physical(state).is_file():
+        require(state.stat().st_size <= 128 * 1024, "Mod choices are too large.")
+        for line in state.read_text(encoding="utf-8-sig").split("\n"):
+            words = line.rstrip("\r").split(" ")
+            words = [w for w in words if w]
+            if len(words) == 2 and words[1] in ("on", "off") and re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,127}", words[0]):
+                choices[words[0]] = words[1] == "on"
+    result = []
+    for folder in folders:
+        require(physical(folder / "mod.json").stat().st_size <= 1024 * 1024, "Configuration is missing or too large.")
+        try:
+            data = {key.casefold(): value for key, value in read_json(folder / "mod.json").items()}
+        except (AccountError, ValueError):
+            continue  # No readable mod.json: no mod.
+        if choices.get(folder.name, data.get("enabled") is not False):
+            result.append((folder.name, folder, data))
+    return result
+
+
+def review(modules, leagues, choices, mods=None):
     result = {"choices": digest(choices)}
     for file in manifests(modules, "module.json"):
         result["module/" + file.relative_to(modules).as_posix()] = digest(file)
-    for manifest in manifests(leagues, "league.json"):
-        folder = manifest.parent
-        for name in ("league.json", "modules.json", "settings.json", ".waypoint-league.json"):
-            file = folder / name
-            if file.exists():
-                result["league/" + file.relative_to(leagues).as_posix()] = digest(file)
-        source = physical(folder / "Source")
-        if source.is_dir():
-            for file in source.iterdir():
-                physical(file)
-                if file.is_file():
-                    result["league/" + file.relative_to(leagues).as_posix()] = digest(file)
-                elif file.is_dir():
-                    result["nested/" + folder.name] = "unsupported"
-        require(len(result) <= 10000, "Content inventory is too large.")
+
+    def add_leagues(root, mod=""):
+        prefix = mod + ":" if mod else ""
+        for manifest in manifests(root, "league.json"):
+            folder = manifest.parent
+            for name in ("league.json", "modules.json", "settings.json", ".waypoint-league.json"):
+                file = folder / name
+                if file.exists():
+                    result["league/" + prefix + file.relative_to(root).as_posix()] = digest(file)
+            source = physical(folder / "Source")
+            if source.is_dir():
+                for file in source.iterdir():
+                    physical(file)
+                    if file.is_file():
+                        result["league/" + prefix + file.relative_to(root).as_posix()] = digest(file)
+                    elif file.is_dir():
+                        result["nested/" + prefix + folder.name] = "unsupported"
+            require(len(result) <= 10000, "Content inventory is too large.")
+
+    add_leagues(leagues)
+    # Every mod's manifest, the choices that turn mods on and off, and the leagues the mods bring: which mods are on, and
+    # what they are, follows from these. GameSystems.CaptureReview takes the same inventory.
+    if mods is not None and physical(mods).is_dir():
+        result["mods"] = digest(mods / "mod-state.txt")
+        for folder in mod_folders(mods):
+            result["mod/" + folder.name + "/mod.json"] = digest(folder / "mod.json")
+            add_leagues(folder / "Leagues", folder.name)
     return result
 
 
@@ -104,7 +149,13 @@ def paths(value):
     return result
 
 
-def catalogue(modules, leagues):
+def canon(path, systems):
+    """An entry names a mod by its id in any case, also as the last part of the path it had as a module."""
+    system = systems.get(path.rsplit("/", 1)[-1].casefold())
+    return system["path"] if system and system.get("mod") else path
+
+
+def catalogue(modules, leagues, mods=None):
     systems = {}
     for file in manifests(modules, "module.json"):
         data = read_json(file)
@@ -113,20 +164,36 @@ def catalogue(modules, leagues):
         systems[identifier.casefold()] = {"path": file.parent.relative_to(modules).as_posix(), "depends": data.get("depends", [])}
         require(isinstance(systems[identifier.casefold()]["depends"], list)
                 and all(isinstance(d, str) for d in systems[identifier.casefold()]["depends"]), "Invalid module dependencies.")
+    # A mod of the leagues that list it is listed by its id. One with a module's id does not load: the module runs.
+    active = on_mods(mods)
+    for identifier, folder, data in active:
+        if data.get("leagues") == "listed" and identifier.casefold() not in systems:
+            depends = data.get("depends", [])
+            require(isinstance(depends, list) and all(isinstance(d, str) for d in depends), "Invalid module dependencies.")
+            systems[identifier.casefold()] = {"path": identifier, "depends": depends, "mod": True}
     profiles = []
     names = set()
-    for file in manifests(leagues, "league.json"):
+    # LocalExile reads the checkout's leagues first, then each mod's: the first of a name stays.
+    roots = [(leagues, "")] + [(folder / "Leagues", identifier) for identifier, folder, _ in active]
+    for file, mod in ((file, mod) for root, mod in roots for file in manifests(root, "league.json")):
         data = read_json(file)
         name = data.get("name", file.parent.name)
+        if mod and isinstance(name, str) and name.casefold() in names:
+            continue
         require(isinstance(name, str) and name and name.casefold() not in names, "Invalid or duplicate league.")
         names.add(name.casefold())
         for key in ("ssf", "hardcore", "ended", "creatable"):
             require(key not in data or isinstance(data[key], bool), "Invalid league flag.")
         for key in ("base", "form", "dataSet", "parent", "entryOf", "entryKind", "deathLeague"):
             require(data.get(key) is None or isinstance(data[key], str), "Invalid league field.")
+        # What it is made of: its modules, then the mods its league.json names.
+        listed = [canon(p, systems) for p in paths(read_json(file.parent / "modules.json").get("modules", []))]
+        own = paths(data.get("mods", []))
+        ids = {p.rsplit("/", 1)[-1].casefold() for p in listed}
+        listed += [canon(p, systems) for p in own if p.rsplit("/", 1)[-1].casefold() not in ids]
         profiles.append({"data": data, "name": name, "folder": file.parent, "base": data.get("base") or name,
                          "mode": (data.get("hardcore", False), data.get("ssf", False), data.get("form") or "", data.get("dataSet") or ""),
-                         "modules": paths(read_json(file.parent / "modules.json").get("modules", [])),
+                         "modules": listed, "mod": mod,
                          "custom": (file.parent / ".waypoint-league.json").exists(),
                          "template": read_json(file.parent / ".waypoint-league.json").get("template", "") if (file.parent / ".waypoint-league.json").exists() else ""})
     for profile in profiles:
@@ -316,6 +383,9 @@ def visibility_plan(profiles, name, visible):
             changes.append(profile)
 
     (show if visible else hide)(target)
+    # A mod's leagues are the mod's files, which an update of the mod replaces.
+    require(not target["mod"] and not any(p["mod"] for p in changes),
+            "A league that a mod brings cannot be hidden or shown here: an update of the mod would undo it.")
     changed = {p["name"].casefold() for p in changes}
     available = {p["name"].casefold(): (visible if p["name"].casefold() in changed else p["data"].get("creatable", True))
                  and not p["data"].get("ended", False) and p["rooted"] for p in profiles}
@@ -348,7 +418,7 @@ def visibility_text(text, visible):
     return text[:closing.start()] + comma + '\n  "creatable": ' + str(visible).lower() + "\n" + text[closing.start():]
 
 
-def apply_visibility(changes, visible, expected, modules, leagues, choices, history):
+def apply_visibility(changes, visible, expected, modules, leagues, choices, history, mods=None):
     if not changes:
         return
     backup = physical(history / uuid.uuid4().hex)
@@ -367,11 +437,11 @@ def apply_visibility(changes, visible, expected, modules, leagues, choices, hist
             prepared.append((file, temporary, old, new))
         evolving = dict(expected)
         for file, temporary, old, new in prepared:
-            require(evolving == review(modules, leagues, choices), "Definitions changed during visibility editing. Refresh before saving.")
+            require(evolving == review(modules, leagues, choices, mods), "Definitions changed during visibility editing. Refresh before saving.")
             os.replace(temporary, file)
             applied.append((file, old, new))
             evolving["league/" + file.relative_to(leagues).as_posix()] = hashlib.sha256(new.encode("utf-8")).hexdigest()
-        require(evolving == review(modules, leagues, choices), "Definitions changed during visibility editing. Refresh before saving.")
+        require(evolving == review(modules, leagues, choices, mods), "Definitions changed during visibility editing. Refresh before saving.")
     except BaseException:
         for file, old, new in reversed(applied):
             if physical(file).read_bytes().decode("utf-8") == new:
@@ -385,14 +455,15 @@ def apply_visibility(changes, visible, expected, modules, leagues, choices, hist
                 temporary.unlink()
 
 
-def run(modules, leagues, choices, database, history, action, request, apply=False, auth=None):
+def run(modules, leagues, choices, database, history, action, request, apply=False, auth=None, mods=None):
     modules, leagues, choices, history = map(physical, (modules, leagues, choices, history))
+    mods = physical(mods) if mods else None
     fields = {"review", "league", "visible"} if action == "SetLeagueVisibility" else {"review", "league", "choices"} if action == "SaveLeagueModules" else {"review", "template", "name", "description", "modules"}
     require(set(request) <= fields,
             "Unsupported league request fields. Modes must come from an existing profile.")
     expected = request.get("review")
-    require(isinstance(expected, dict) and expected == review(modules, leagues, choices), "League or module definitions changed. Refresh and review the draft before saving.")
-    systems, profiles = catalogue(modules, leagues)
+    require(isinstance(expected, dict) and expected == review(modules, leagues, choices, mods), "League or module definitions changed. Refresh and review the draft before saving.")
+    systems, profiles = catalogue(modules, leagues, mods)
     current = read_json(choices) if choices.exists() else {}
     if action == "SetLeagueVisibility":
         visible = request.get("visible")
@@ -400,7 +471,7 @@ def run(modules, leagues, choices, database, history, action, request, apply=Fal
         require("game" in systems, "The Game module is missing.")
         changes = visibility_plan(profiles, request.get("league"), visible)
         if apply:
-            apply_visibility(changes, visible, expected, modules, leagues, choices, history)
+            apply_visibility(changes, visible, expected, modules, leagues, choices, history, mods)
         return
     if action == "SaveLeagueModules":
         target = request.get("league")
@@ -413,7 +484,7 @@ def run(modules, leagues, choices, database, history, action, request, apply=Fal
         entries = [v for k, v in updated.items() if k.casefold() == target.casefold()]
         require(len(entries) == 1 and isinstance(entries[0], dict), "Invalid league choices.")
         change = entries[0]
-        added, removed = paths(change.get("add")), paths(change.get("remove"))
+        added, removed = [canon(p, systems) for p in paths(change.get("add"))], paths(change.get("remove"))
         require(all(p.rsplit("/", 1)[-1].casefold() != "game" for p in removed), "The Game module cannot be removed.")
         gone = {p.rsplit("/", 1)[-1].casefold() for p in removed}
         selected = [p for p in profile["modules"] if p.rsplit("/", 1)[-1].casefold() not in gone]
@@ -422,7 +493,7 @@ def run(modules, leagues, choices, database, history, action, request, apply=Fal
                 selected.append(path)
         # What this league's saved choices add now, read as LocalExile reads it: a missing or odd list adds nothing.
         saved = next((v for k, v in current.items() if k.casefold() == target.casefold() and isinstance(v, dict)), {})
-        adds = [p.replace("\\", "/") for p in saved.get("add") or [] if isinstance(p, str)] if isinstance(saved.get("add"), list) else []
+        adds = [canon(p.replace("\\", "/"), systems) for p in saved.get("add") or [] if isinstance(p, str)] if isinstance(saved.get("add"), list) else []
         validate_modules(profile, selected, systems, profiles, listed=profile["modules"] + adds)
         if apply:
             physical(choices.parent).mkdir(parents=True, exist_ok=True)
@@ -433,7 +504,7 @@ def run(modules, leagues, choices, database, history, action, request, apply=Fal
             temporary = choices.parent / ("waypoint-" + uuid.uuid4().hex + ".tmp")
             try:
                 write_exclusive(temporary, json.dumps(updated, ensure_ascii=False, indent=2))
-                require(expected == review(modules, leagues, choices), "Configuration changed during the write. Nothing was replaced.")
+                require(expected == review(modules, leagues, choices, mods), "Configuration changed during the write. Nothing was replaced.")
                 os.replace(temporary, choices)
             finally:
                 if temporary.exists():
@@ -461,7 +532,8 @@ def run(modules, leagues, choices, database, history, action, request, apply=Fal
         return
     definition = dict(template["data"])
     definition.update(name=name, base=template["base"], parent="Void", description=description, creatable=True, ended=False)
-    for key in ("entryOf", "entryKind", "deathLeague"):
+    # Its mods are in its modules list, which its user chose: a template's own "mods" would name them again.
+    for key in ("entryOf", "entryKind", "deathLeague", "mods"):
         definition.pop(key, None)
     if definition.get("hardcore"):
         definition["deathLeague"] = "Void"
@@ -482,7 +554,7 @@ def run(modules, leagues, choices, database, history, action, request, apply=Fal
         manifest = destination / "league.json"
         temporary = destination / "league.json.pending"
         write_exclusive(temporary, json.dumps(definition, ensure_ascii=False, indent=2), created)
-        require(expected == review(modules, leagues, choices), "Definitions changed during creation. The new league was not published.")
+        require(expected == review(modules, leagues, choices, mods), "Definitions changed during creation. The new league was not published.")
         # A hard link publishes a complete file atomically and refuses an existing target on both Windows and Linux.
         os.link(temporary, manifest)
         try:
@@ -504,11 +576,12 @@ def main():
         # Windows PowerShell pipelines can include a UTF-8 BOM. Accept one leading marker,
         # as read_json does for files, while retaining strict JSON and duplicate-key checks.
         request = json.loads(sys.stdin.read().removeprefix("\ufeff"), object_pairs_hook=unique_object)
+        # The mods' folder follows the phase ("-" when the servers load no mods), then a split layout's auth.db.
+        mods = Path(sys.argv[8]) if len(sys.argv) > 8 and sys.argv[8] != "-" else None
         if sys.argv[6] == "Inspect":
-            print(json.dumps({"Ok": True, "Review": review(*map(Path, sys.argv[1:4]))}))
+            print(json.dumps({"Ok": True, "Review": review(*map(Path, sys.argv[1:4]), mods)}))
             return 0
-        # A split layout's auth.db follows the phase.
-        run(*sys.argv[1:6], sys.argv[6], request, apply=sys.argv[7] == "apply", auth=sys.argv[8] if len(sys.argv) > 8 else None)
+        run(*sys.argv[1:6], sys.argv[6], request, apply=sys.argv[7] == "apply", auth=sys.argv[9] if len(sys.argv) > 9 else None, mods=mods)
         print(json.dumps({"Ok": True}))
         return 0
     except (AccountError, OSError, ValueError, TypeError, KeyError, sqlite3.Error) as error:

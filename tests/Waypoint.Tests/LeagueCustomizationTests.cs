@@ -418,21 +418,92 @@ public sealed class LeagueCustomizationTests : IDisposable
         catalog = new(Environment); standard = catalog.Leagues.Single(l => l.Name == "Standard");
         Assert.Throws<InvalidOperationException>(() => catalog.VisibilityPlan(standard, false));
     }
-    [Fact]
-    public async Task Frontend_and_authoritative_adapter_review_the_same_files()
+    // The adapter's own inventory of the same folders (scripts/LeagueData.py, as ContentBridge.ps1 runs it).
+    async Task<JsonNode?> AdapterReview(ContentEnvironment environment)
     {
-        var catalog = Catalog();
         var start = new ProcessStartInfo(Platform.Python) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardInput = true,
             RedirectStandardOutput = true, RedirectStandardError = true };
-        foreach (string argument in new[] { Path.Combine(AppContext.BaseDirectory, "LeagueData.py"), Environment.Modules, Environment.Leagues, Environment.Choices,
-            Path.Combine(_root, "data/saves.db"), Path.Combine(_root, "history"), "Inspect", "check" }) start.ArgumentList.Add(argument);
+        foreach (string argument in new[] { Path.Combine(AppContext.BaseDirectory, "LeagueData.py"), environment.Modules, environment.Leagues, environment.Choices,
+            Path.Combine(_root, "data/saves.db"), Path.Combine(_root, "history"), "Inspect", "check", environment.Mods.Length > 0 ? environment.Mods : "-" }) start.ArgumentList.Add(argument);
         using var process = Process.Start(start)!;
         await process.StandardInput.WriteLineAsync("{}"); process.StandardInput.Close();
         string output = await process.StandardOutput.ReadToEndAsync();
         string error = await process.StandardError.ReadToEndAsync();
         await process.WaitForExitAsync();
         Assert.True(process.ExitCode == 0, error + output);
-        Assert.True(JsonNode.DeepEquals(catalog.Review, JsonNode.Parse(output)!["Review"]));
+        return JsonNode.Parse(output)!["Review"];
+    }
+    [Fact]
+    public async Task Frontend_and_authoritative_adapter_review_the_same_files()
+    {
+        var catalog = Catalog();
+        Assert.True(JsonNode.DeepEquals(catalog.Review, await AdapterReview(Environment)));
+    }
+    [Fact]
+    public async Task A_leagues_mod_is_listed_like_a_module_and_a_mods_league_is_a_league()
+    {
+        // Mods of the leagues that list them (bots, idols), one of every league, two turned off, one with a module's id.
+        void Mod(string id, string json) => Write($"Mods/Binaries/{id}/mod.json", json);
+        Mod("bots", "{ // a comment\n\"Leagues\":\"listed\",\"name\":\"Bots\",\"depends\":[\"Game\"] }");
+        Mod("idols", """{"leagues":"listed"}""");
+        Mod("every", """{"description":"runs in every league"}""");
+        Mod("off", """{"leagues":"listed","enabled":false}""");
+        Mod("stated", """{"leagues":"listed"}""");
+        Mod("harvest", """{"leagues":"listed"}""");
+        Mod("broken", "{ not json");
+        Write("Mods/Binaries/mod-state.txt", "stated off\nbots on\n");
+        Write("Mods/Binaries/idols/Leagues/Phrecia/league.json", """{"name":"Phrecia","base":"Standard","parent":"Standard","mods":["idols"]}""");
+        Write("Mods/Binaries/idols/Leagues/Phrecia/modules.json", """{"modules":["Core/Game"]}""");
+        Write("Mods/Binaries/idols/Leagues/Phrecia/Source/Fixture.cs", "public sealed class FixtureLeague : League { }");
+        Write("Mods/Binaries/idols/Leagues/Standard/league.json", """{"name":"Standard"}""");
+        Write("Mods/Binaries/idols/Leagues/Standard/modules.json", """{"modules":[]}""");
+        Write("Mods/Binaries/off/Leagues/Hidden/league.json", """{"name":"Hidden","parent":"Standard"}""");
+        Write("Mods/Binaries/off/Leagues/Hidden/modules.json", """{"modules":["Core/Game"]}""");
+        // The user's choices name a mod by its id in any case, also by the path it had as a module.
+        Write("data/league-modules.json", """{"Standard":{"add":["Custom/Bots"],"remove":[]}}""");
+        Catalog();
+        Profile("Needs", "Standard", """["Core/Game"]""", ",\"mods\":[\"absent\"]");
+        var environment = Environment with { Mods = Path.Combine(_root, "Mods", "Binaries") };
+        var catalog = new GameSystems(environment);
+
+        Assert.Equal(["bots", "idols"], catalog.Systems.Where(s => s.Mod).Select(s => s.Path).Order());
+        Assert.Equal("Bots", catalog.Systems.Single(s => s.Id == "bots").Name);
+        Assert.False(catalog.Systems.Single(s => s.Id == "Harvest").Mod);
+        var standard = catalog.Leagues.Single(l => l.Name == "Standard");
+        var phrecia = catalog.Leagues.Single(l => l.Name == "Phrecia");
+        Assert.DoesNotContain(catalog.Leagues, l => l.Name == "Hidden");
+        Assert.Equal("", standard.Mod);
+        Assert.Equal(Path.Combine(_root, "Leagues", "Standard"), standard.Folder);
+        Assert.Contains("bots", standard.Systems);
+        Assert.Equal("idols", phrecia.Mod);
+        Assert.Equal(["Core/Game", "idols"], phrecia.BaseSystems);
+        Assert.True(catalog.LoadedDefinition(phrecia));
+
+        // A mod is ticked like a module: by its id, with what it depends on, and a league's own can be left out.
+        Assert.Equal("""["bots","idols"]""", catalog.Plan(standard, [.. standard.Systems, "idols"])["Standard"]!["add"]!.ToJsonString());
+        Assert.Equal("""["idols"]""", catalog.Plan(phrecia, ["Core/Game"])["Phrecia"]!["remove"]!.ToJsonString());
+        Assert.NotNull(catalog.CompositionError(phrecia, ["idols"]));
+        Assert.Contains("idols", catalog.BundleModules(phrecia));
+        Assert.True(catalog.AddOn("bots"));
+        // A mod's league is the mod's files.
+        Assert.Throws<InvalidOperationException>(() => catalog.VisibilityPlan(phrecia, false));
+        // A league does not load without a mod its league.json names, unless its user took the mod off its list.
+        Assert.False(catalog.LoadedDefinition(catalog.Leagues.Single(l => l.Name == "Needs")));
+        Write("data/league-modules.json", """{"Needs":{"add":[],"remove":["ABSENT"]}}""");
+        catalog = new GameSystems(environment);
+        Assert.True(catalog.LoadedDefinition(catalog.Leagues.Single(l => l.Name == "Needs")));
+
+        // Both sides review the same files; a mod turned off changes what is reviewed and what is there.
+        Assert.True(JsonNode.DeepEquals(catalog.Review, await AdapterReview(environment)));
+        Assert.NotNull(catalog.Review["mod/idols/mod.json"]);
+        Assert.NotNull(catalog.Review["league/idols:Phrecia/league.json"]);
+        Write("Mods/Binaries/mod-state.txt", "idols off\n");
+        var without = new GameSystems(environment);
+        Assert.False(JsonNode.DeepEquals(catalog.Review, without.Review));
+        Assert.DoesNotContain(without.Leagues, l => l.Name == "Phrecia");
+        Assert.True(JsonNode.DeepEquals(without.Review, await AdapterReview(environment)));
+        // Without the mods' folder nothing of it is read.
+        Assert.DoesNotContain(new GameSystems(Environment).Systems, s => s.Mod);
     }
     public void Dispose() { if (Directory.Exists(_root)) Directory.Delete(_root, true); }
 }

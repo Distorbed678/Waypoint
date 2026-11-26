@@ -331,7 +331,11 @@ check installed modules and dependencies and preserve the choices of other leagu
 server. Membership is a next-start choice, never a claim that the running server applied it.
 
 League changes now use an envelope with `league`, `choices` and `review`. `review` maps every relevant module manifest,
-league definition/list/settings/source file and custom marker to its SHA-256, plus the user override file. The inventory
+league definition/list/settings/source file and custom marker to its SHA-256, plus the user override file. With mods on
+(`ContentEnvironment.Mods`, the mods' folder; empty under `Game_MODS=0`) it also maps `mod-state.txt`, every mod's
+`mod.json` and the league files of every mod's `Leagues/` (`league/<mod id>:<path>`): which mods are on, which belong to
+leagues and which leagues they bring follows from those, read the same way by `GameSystems` and `LeagueData.py` (the
+mods' folder is the helper's eighth argument, `-` for none). The inventory
 must match exactly, including new/deleted files. `LeagueData.py` validates dependencies, cycles, required dedicated bundles,
 parent chains and a whole-composition witness from an existing same-family/mode profile. Only the selected league's
 override can change; other entries remain byte-value equivalent. Prior configuration is retained before atomic replacement.

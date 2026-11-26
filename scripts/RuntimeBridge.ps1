@@ -169,7 +169,7 @@ function Get-ContentEnvironment {
     # the files of its zip, leaves that league's folder alone. The leagues that came with the release are the release's
     # files, which an update writes over: those are not hidden or shown here (ShippedLeaguesFixed).
     if ($script:isRelease) { $canChoose = $canEditSettings = $canCreate = -not (Test-LegacyReleaseMods) }
-    return @{ Modules=[IO.Path]::GetFullPath($modules); Leagues=[IO.Path]::GetFullPath($leagues); Choices=[IO.Path]::GetFullPath($choices); CanChoose=$canChoose; CanEditSettings=$canEditSettings; CanCreate=$canCreate; ShippedLeaguesFixed=[bool]$script:isRelease }
+    return @{ Modules=[IO.Path]::GetFullPath($modules); Leagues=[IO.Path]::GetFullPath($leagues); Choices=[IO.Path]::GetFullPath($choices); CanChoose=$canChoose; CanEditSettings=$canEditSettings; CanCreate=$canCreate; ShippedLeaguesFixed=[bool]$script:isRelease; Mods=$(if ($env:Game_MODS -ne '0') { [IO.Path]::GetFullPath((Get-ModFolder)) } else { '' }) }
 }
 function Join-Relative([string]$path) { if ([IO.Path]::IsPathRooted($path)) { $path } else { At $path } }
 function Get-Inventory {

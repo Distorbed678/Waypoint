@@ -2151,6 +2151,9 @@
   <data name="Text_378c3757374c" xml:space="preserve">
     <value>不限制装备类别</value>
   </data>
+  <data name="Text_37a50d180bfc" xml:space="preserve">
+    <value>来自模组：{0}</value>
+  </data>
   <data name="Text_37a8eec1ce19" xml:space="preserve">
     <value>默认</value>
   </data>
@@ -8967,6 +8970,9 @@ Gateway 最近报告的事件。打开 Gateway 输出查看详情。</value>
   </data>
   <data name="Text_f18e2bb0aa10" xml:space="preserve">
     <value>使用独立的游戏设置</value>
+  </data>
+  <data name="Text_f1959987d67e" xml:space="preserve">
+    <value>模组带来的联赛无法在这里隐藏或显示：更新该模组会撤销该更改。</value>
   </data>
   <data name="Text_f1b7505afa5c" xml:space="preserve">
     <value>社交</value>

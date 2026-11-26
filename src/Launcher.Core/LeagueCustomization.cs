@@ -18,20 +18,39 @@ public sealed partial class GameSystems
             result[category + Path.GetRelativePath(root, file).Replace('\\', '/')] = Hash(file);
         }
         foreach (var file in Manifests(environment.Modules, "module.json")) Add("module/", environment.Modules, file);
-        foreach (var manifest in Manifests(environment.Leagues, "league.json"))
+        void AddLeagues(string root, string mod = "")
         {
-            var folder = Path.GetDirectoryName(manifest)!;
-            foreach (var name in new[] { "league.json", "modules.json", "settings.json", ".waypoint-league.json" })
-                if (File.Exists(Path.Combine(folder, name))) Add("league/", environment.Leagues, Path.Combine(folder, name));
-            string source = Path.Combine(folder, "Source");
-            if (Directory.Exists(source))
+            string category = "league/" + (mod.Length > 0 ? mod + ":" : "");
+            foreach (var manifest in Manifests(root, "league.json"))
             {
-                if (!ModCatalog.Physical(source)) throw new IOException(L.Text("Redirected module paths are not supported."));
-                // Only flat, physical source is eligible for creation; inventory every file, including unsupported ones.
-                foreach (string file in Directory.GetFiles(source)) Add("league/", environment.Leagues, file);
-                if (Directory.GetDirectories(source).Length > 0) result["nested/" + Path.GetFileName(folder)] = "unsupported";
+                var folder = Path.GetDirectoryName(manifest)!;
+                foreach (var name in new[] { "league.json", "modules.json", "settings.json", ".waypoint-league.json" })
+                    if (File.Exists(Path.Combine(folder, name))) Add(category, root, Path.Combine(folder, name));
+                string source = Path.Combine(folder, "Source");
+                if (Directory.Exists(source))
+                {
+                    if (!ModCatalog.Physical(source)) throw new IOException(L.Text("Redirected module paths are not supported."));
+                    // Only flat, physical source is eligible for creation; inventory every file, including unsupported ones.
+                    foreach (string file in Directory.GetFiles(source)) Add(category, root, file);
+                    if (Directory.GetDirectories(source).Length > 0) result["nested/" + (mod.Length > 0 ? mod + ":" : "") + Path.GetFileName(folder)] = "unsupported";
+                }
+                if (result.Count > 10000) throw new IOException(L.Text("Settings are too deeply nested or too large."));
             }
-            if (result.Count > 10000) throw new IOException(L.Text("Settings are too deeply nested or too large."));
+        }
+        AddLeagues(environment.Leagues);
+        // Every mod's manifest, the choices that turn mods on and off, and the leagues the mods bring: which mods are on, and
+        // what they are, follows from these. scripts/LeagueData.py takes the same inventory.
+        if (environment.Mods.Length > 0 && Directory.Exists(environment.Mods))
+        {
+            if (!ModCatalog.Physical(environment.Mods)) throw new IOException(L.Text("Redirected module paths are not supported."));
+            result["mods"] = Hash(Path.Combine(environment.Mods, "mod-state.txt"));
+            foreach (string folder in Directory.GetDirectories(environment.Mods).OrderBy(f => Path.GetFileName(f), StringComparer.Ordinal).Take(512))
+            {
+                string id = Path.GetFileName(folder), file = Path.Combine(folder, "mod.json");
+                if (!ModCatalog.ValidId(id) || !File.Exists(file)) continue;
+                Add("mod/", environment.Mods, file);
+                AddLeagues(Path.Combine(folder, "Leagues"), id);
+            }
         }
         return result;
     }
@@ -260,6 +279,9 @@ public sealed partial class GameSystems
             }
         }
         Visit(league);
+        // A mod's leagues are the mod's files, which an update of the mod replaces.
+        if (changes.Any(l => l.Mod.Length > 0) || league.Mod.Length > 0)
+            throw new InvalidOperationException(L.Text("A league that a mod brings can't be hidden or shown here: an update of the mod would undo it."));
         bool Offered(GameLeague item) => (changes.Contains(item) ? visible : item.Creatable) && !item.Ended && Rooted(item);
         if (!Systems.Any(s => s.Id.Equals("Game", StringComparison.OrdinalIgnoreCase)) || !Leagues.Any(l => Offered(l) && l.EntryOf.Length == 0
             && l.BaseSystems.Any(p => Id(p).Equals("Game", StringComparison.OrdinalIgnoreCase))))
