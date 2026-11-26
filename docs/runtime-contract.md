@@ -126,7 +126,9 @@ Accept a server as owned only when:
 
 - It is dotnet with exactly the expected Debug assembly argument (+ `serve` for Auth).
 - Its live parent is a dedicated cmd created no later than the server, with the exact upstream command and both
-  absolute per-checkout log destinations. Trailing Windows command-line whitespace is ignored.
+  absolute per-checkout log destinations. Trailing Windows command-line whitespace is ignored. The command names the
+  assembly by its path under the checkout or, as LocalExile's launcher does since 2026-10-31, by its full path, with the
+  whole line in quotes.
 - Its PID owns every required listening port before the status becomes Ready.
 
 Do not adopt unrelated absolute build folders, identical relative DLL paths in another checkout, shared terminal
