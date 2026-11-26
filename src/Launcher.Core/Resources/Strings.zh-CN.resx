@@ -1568,6 +1568,9 @@
   <data name="Text_28c9a44bcbb7" xml:space="preserve">
     <value>不做任何更改。如果此客户端与你平时玩的游戏共用设置，你需要自行在游戏中设置“连线模式”（Networking Mode）。</value>
   </data>
+  <data name="Text_28f8132472d1" xml:space="preserve">
+    <value>请重启服务器，以应用对联盟模组的更改。</value>
+  </data>
   <data name="Text_28fd171b0b6b" xml:space="preserve">
     <value>下次再询问</value>
   </data>
@@ -2760,6 +2763,9 @@
   </data>
   <data name="Text_480d4be7d61f" xml:space="preserve">
     <value>盾牌</value>
+  </data>
+  <data name="Text_481ebcccf62c" xml:space="preserve">
+    <value>没有联盟使用它</value>
   </data>
   <data name="Text_4850b174b713" xml:space="preserve">
     <value>必需</value>
@@ -5148,6 +5154,9 @@
   <data name="Text_8ad920a3b55b" xml:space="preserve">
     <value>塑界者</value>
   </data>
+  <data name="Text_8b10a3945dee" xml:space="preserve">
+    <value>联盟内容</value>
+  </data>
   <data name="Text_8b18eaba7be1" xml:space="preserve">
     <value>3.  复制客户端并进行准备</value>
   </data>
@@ -7214,6 +7223,9 @@
   </data>
   <data name="Text_c1949802a579" xml:space="preserve">
     <value>附魔</value>
+  </data>
+  <data name="Text_c19cd7719e80" xml:space="preserve">
+    <value>新增联盟 {0}</value>
   </data>
   <data name="Text_c1a0441de50c" xml:space="preserve">
     <value>返回我的模组</value>

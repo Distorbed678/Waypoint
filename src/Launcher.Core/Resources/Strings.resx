@@ -1568,6 +1568,9 @@ Change location above to choose somewhere else.</value>
   <data name="Text_28c9a44bcbb7" xml:space="preserve">
     <value>Nothing changes. If this client shares its settings with your normal game, you set Networking Mode in the game yourself.</value>
   </data>
+  <data name="Text_28f8132472d1" xml:space="preserve">
+    <value>Restart the servers to apply the change to a league's mod.</value>
+  </data>
   <data name="Text_28fd171b0b6b" xml:space="preserve">
     <value>Ask again next time</value>
   </data>
@@ -2760,6 +2763,9 @@ This checkout has modified tracked files.</value>
   </data>
   <data name="Text_480d4be7d61f" xml:space="preserve">
     <value>Shield</value>
+  </data>
+  <data name="Text_481ebcccf62c" xml:space="preserve">
+    <value>No league uses it</value>
   </data>
   <data name="Text_4850b174b713" xml:space="preserve">
     <value>Required</value>
@@ -5148,6 +5154,9 @@ Switching to it builds and runs that code on this computer with your rights, liv
   <data name="Text_8ad920a3b55b" xml:space="preserve">
     <value>Shaper</value>
   </data>
+  <data name="Text_8b10a3945dee" xml:space="preserve">
+    <value>League content</value>
+  </data>
   <data name="Text_8b18eaba7be1" xml:space="preserve">
     <value>3.  Copies the client and prepares it</value>
   </data>
@@ -7214,6 +7223,9 @@ Owned servers will stop. Automatic backup is {2}. Source, client and login keys 
   </data>
   <data name="Text_c1949802a579" xml:space="preserve">
     <value>Enchantments</value>
+  </data>
+  <data name="Text_c19cd7719e80" xml:space="preserve">
+    <value>Adds league {0}</value>
   </data>
   <data name="Text_c1a0441de50c" xml:space="preserve">
     <value>Back to My Mods</value>
