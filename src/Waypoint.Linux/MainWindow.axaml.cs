@@ -70,6 +70,12 @@ public partial class MainWindow : Window
     readonly ToolsTab ToolsView = new();
     readonly SettingsTab SettingsView = new();
     bool _closing, _deciding, _explicitExit;
+    /// <summary>The tray icon, while the window is hidden (none when only a picture is made).</summary>
+    readonly Tray? _tray = Program.Rendering ? null : new();
+    /// <summary>Whether the game ran at the last sample: null until the first one.</summary>
+    bool? _clientRunning;
+    /// <summary>The window went to the tray because the game started, and comes back when it closes.</summary>
+    bool _hiddenForGame;
 
     public MainWindow()
     {
@@ -120,7 +126,18 @@ public partial class MainWindow : Window
             new("Settings", MaterialIconKind.CogOutline, SettingsView),
         ];
         foreach (var section in _sections) { section.View.IsVisible = false; SectionHost.Children.Add(section.View); }
-        _shared.Monitor.Sampled += samples => Dispatcher.UIThread.Post(() => ShowStatus(samples));
+        _shared.Monitor.Sampled += samples => Dispatcher.UIThread.Post(() =>
+        {
+            ShowStatus(samples);
+            ClientSeen(samples.Any(s => s.Service == Service.Client && s.Running));
+        });
+        if (_tray is not null)
+        {
+            _tray.ShowRequested += ShowFromTray;
+            _tray.StopAllRequested += async () => await _shared.StopAllAsync(_ => { });
+            _tray.ExitRequested += () => { ShowFromTray(); _explicitExit = true; Close(); };
+            L.Current.PropertyChanged += (_, _) => _tray.ShowLanguage();
+        }
         _shared.LiveRunning += _ => Dispatcher.UIThread.Post(() => ShowStatus(_shared.Monitor.Latest));
         _shared.Workspace.Failed += (stage, message, log) => Dispatcher.UIThread.Post(() => ShowFailure(stage, message, log));
 
@@ -194,7 +211,11 @@ public partial class MainWindow : Window
             else if (title is not null) Title = title;
         };
         Closing += WindowClosing;
-        Closed += (_, _) => _shared.Dispose();
+        Closed += (_, _) =>
+        {
+            _tray?.Dispose();
+            _shared.Dispose();
+        };
     }
 
     /// <summary>Simple mode's sections and nothing about the servers, or all of them. The section on show stays when the new
@@ -519,8 +540,15 @@ public partial class MainWindow : Window
             Dialog.Tell(this, DialogKind.Info, L.Text("{0} is still running", _shared.BusyWith), L.Text("Close Waypoint when it is done."));
             return;
         }
+        // Kept in the tray, as the close choice says, where the desktop shows one: Waypoint and what runs go on.
+        if (!explicitExit && settings.CloseToTray && Tray.Available && !settings.AlwaysAskOnClose)
+        {
+            e.Cancel = true;
+            Dispatcher.UIThread.Post(HideToTray);
+            return;
+        }
         bool stop = settings.StopServicesOnExit;
-        if (anything && settings.AlwaysAskOnClose && !explicitExit)
+        if ((anything || settings.CloseToTray && Tray.Available) && settings.AlwaysAskOnClose && !explicitExit)
         {
             e.Cancel = true;
             _deciding = true;
@@ -539,10 +567,51 @@ public partial class MainWindow : Window
     void AskClose()
     {
         _deciding = false;
-        int chosen = Dialog.Show(this, DialogKind.Question, L.Text("When Waypoint exits"), L.Text("Close Waypoint completely."), null,
-            [L.Text("Stop services and exit"), L.Text("Exit Waypoint"), L.Text("Cancel")]);
-        if (chosen == 0) StopAndClose();
+        // Hiding to the tray is one of the answers only where the desktop shows a tray.
+        string[] answers = Tray.Available
+            ? [L.Text("Hide to tray"), L.Text("Stop services and exit"), L.Text("Exit Waypoint"), L.Text("Cancel")]
+            : [L.Text("Stop services and exit"), L.Text("Exit Waypoint"), L.Text("Cancel")];
+        int chosen = Dialog.Show(this, DialogKind.Question, L.Text("When Waypoint exits"), L.Text("Close Waypoint completely."), null, answers);
+        if (Tray.Available) chosen--;
+        if (chosen == -1 && Tray.Available) HideToTray();
+        else if (chosen == 0) StopAndClose();
         else if (chosen == 1) { _closing = true; Close(); }
+    }
+
+    /// <summary>A client that starts sends the window to the tray; when no client is left it comes back. A client that
+    /// Play closes and starts again (one live.ps1 run) keeps it in the tray, and a window opened while the game already
+    /// runs stays open. Only where the desktop shows a tray, from which the window comes back.</summary>
+    void ClientSeen(bool running)
+    {
+        bool started = running && _clientRunning == false;
+        _clientRunning = running;
+        if (started && _shared.Settings.TrayWhileGameRuns && Tray.Available && _tray is not null && IsVisible && !_closing)
+        {
+            _hiddenForGame = true;
+            Hide();
+            _tray.Visible = true;
+            Tray.Notify(L.Text("The game is running: Waypoint waits here and comes back when the game closes."));
+        }
+        else if (!running && _hiddenForGame && !_shared.IsLiveRunning)
+        {
+            ShowFromTray();
+        }
+    }
+
+    void ShowFromTray()
+    {
+        _hiddenForGame = false;
+        if (_tray is not null) _tray.Visible = false;
+        Show();
+        if (WindowState == WindowState.Minimized) WindowState = WindowState.Normal;
+        Activate();
+    }
+
+    void HideToTray()
+    {
+        if (_tray is null || !Tray.Available) return;
+        _tray.Visible = true;
+        Hide();
     }
 
     async void StopAndClose()

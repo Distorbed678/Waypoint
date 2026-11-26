@@ -49,6 +49,10 @@ partial class SettingsTab : UserControl
         LeaveServices.IsChecked = !S.StopServicesOnExit;
         ShowServicesHelp();
         AlwaysAsk.IsChecked = S.AlwaysAskOnClose;
+        TrayChoices.IsVisible = TrayWhileGame.IsVisible = Tray.Available;
+        KeepInTray.IsChecked = S.CloseToTray;
+        ExitApplication.IsChecked = !S.CloseToTray;
+        TrayWhileGame.IsChecked = S.TrayWhileGameRuns;
         CheckAtStart.IsChecked = S.CheckForUpdates;
         KeepUpToDate.IsChecked = S.KeepUpToDate;
         UseProfile.IsChecked = S.UseLocalProfile;
@@ -132,6 +136,21 @@ partial class SettingsTab : UserControl
     {
         if (_loading || _shared is null || sender is not RadioButton { IsChecked: true }) return;
         S.ClientSwitch = SwitchKeepBoth.IsChecked == true ? nameof(SwitchWay.KeepBoth) : SwitchInPlace.IsChecked == true ? nameof(SwitchWay.UpdateInPlace) : "";
+        S.Save();
+    }
+
+    void CloseChoiceChanged(object? sender, RoutedEventArgs e)
+    {
+        if (_loading || _shared is null || sender is not RadioButton { IsChecked: true }) return;
+        S.CloseToTray = sender == KeepInTray;
+        S.CloseBehaviorConfirmed = true;
+        S.Save();
+    }
+
+    void TrayChanged(object? sender, RoutedEventArgs e)
+    {
+        if (_loading || _shared is null) return;
+        S.TrayWhileGameRuns = TrayWhileGame.IsChecked == true;
         S.Save();
     }
 

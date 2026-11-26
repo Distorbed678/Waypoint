@@ -15,12 +15,22 @@
       <Border Classes="card">
         <StackPanel Spacing="4">
           <TextBlock x:Name="WindowHeading" Classes="heading" />
+          <!-- The tray's choices, only where the desktop shows a tray (Tray.Available). -->
+          <StackPanel x:Name="TrayChoices" Spacing="4">
+            <TextBlock Text="{l:Loc 'When I close the window'}" FontWeight="SemiBold" Margin="0,2,0,2" />
+            <RadioButton x:Name="KeepInTray" GroupName="WindowClose" Content="{l:Loc 'Keep Waypoint running in the tray'}" IsCheckedChanged="CloseChoiceChanged" />
+            <TextBlock Text="{l:Loc 'Hide the window beside the clock. Waypoint, services and the game keep running.'}" Classes="note" Margin="27,0,0,4" />
+            <RadioButton x:Name="ExitApplication" GroupName="WindowClose" Content="{l:Loc 'Exit Waypoint'}" IsCheckedChanged="CloseChoiceChanged" />
+            <TextBlock Text="{l:Loc 'Close Waypoint completely.'}" Classes="note" Margin="27,0,0,4" />
+          </StackPanel>
           <TextBlock x:Name="ExitHeading" FontWeight="SemiBold" Margin="0,2,0,2" />
           <RadioButton x:Name="LeaveServices" GroupName="ServiceExit" IsCheckedChanged="ServicesChanged" />
           <RadioButton x:Name="StopServices" GroupName="ServiceExit" IsCheckedChanged="ServicesChanged" />
           <TextBlock x:Name="ServicesHelp" Classes="note" Margin="0,0,0,6" />
           <Border Height="1" Background="{DynamicResource Shell.Border}" Margin="0,2,0,6" />
           <CheckBox x:Name="AlwaysAsk" IsCheckedChanged="AlwaysAskChanged" />
+          <CheckBox x:Name="TrayWhileGame" Content="{l:Loc 'Tray while the game runs'}" IsCheckedChanged="TrayChanged"
+                    ToolTip.Tip="{l:Loc 'Hide Waypoint in the tray when the game starts, and bring it back when the game closes'}" />
         </StackPanel>
       </Border>
 
