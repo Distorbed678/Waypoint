@@ -6957,6 +6957,9 @@
   <data name="Text_b9d5ec6bc16f" xml:space="preserve">
     <value>此客户端是指向 {0} 的链接，从该文件夹启动的其他任何程序都会使用相同的设置。</value>
   </data>
+  <data name="Text_b9dbb805fc1c" xml:space="preserve">
+    <value>{0} 不能与 {1} 同时运行。</value>
+  </data>
   <data name="Text_b9f4f560cff4" xml:space="preserve">
     <value>不在打开列表中的拉取请求：按编号从 GitHub 获取其 head</value>
   </data>
@@ -7343,6 +7346,9 @@
   </data>
   <data name="Text_c5132d954d7b" xml:space="preserve">
     <value>下次记住此选择</value>
+  </data>
+  <data name="Text_c533559f1887" xml:space="preserve">
+    <value>{0} 只允许其列出的模块和模组，{1} 不在其中。</value>
   </data>
   <data name="Text_c53d2d6c95e3" xml:space="preserve">
     <value>点击查看你的其他 LocalExile 文件夹</value>

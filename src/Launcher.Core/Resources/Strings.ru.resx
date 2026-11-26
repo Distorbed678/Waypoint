@@ -6957,6 +6957,9 @@
   <data name="Text_b9d5ec6bc16f" xml:space="preserve">
     <value>Этот клиент — ссылка на {0}, и всё, что запускается из этой папки, будет использовать те же настройки.</value>
   </data>
+  <data name="Text_b9dbb805fc1c" xml:space="preserve">
+    <value>{0} не может работать вместе с {1}.</value>
+  </data>
   <data name="Text_b9f4f560cff4" xml:space="preserve">
     <value>Запрос на слияние не из списка открытых: его HEAD будет получен с GitHub по номеру</value>
   </data>
@@ -7343,6 +7346,9 @@
   </data>
   <data name="Text_c5132d954d7b" xml:space="preserve">
     <value>Запомнить для следующего раза</value>
+  </data>
+  <data name="Text_c533559f1887" xml:space="preserve">
+    <value>{0} допускает только названные в нём модули и моды, а {1} среди них нет.</value>
   </data>
   <data name="Text_c53d2d6c95e3" xml:space="preserve">
     <value>Нажмите, чтобы увидеть другие папки LocalExile</value>

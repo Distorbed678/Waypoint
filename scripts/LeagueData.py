@@ -196,13 +196,25 @@ def valid_league_folder(name):
     return 0 < len(name) <= 128 and name not in (".", "..") and not any(c in '/\\:*?"<>|' or ord(c) < 32 or 127 <= ord(c) < 160 for c in name)
 
 
+def limits(data):
+    """A manifest's "conflicts" and "only", as LocalExile's ModFolders.Limits reads them: these keys exactly, lists of ids,
+    or no limits from it at all when one of them is something else (LocalExile logs that manifest)."""
+    def ids(name):
+        value = data.get(name)
+        return value if isinstance(value, list) and all(isinstance(v, str) for v in value) else None
+    conflicts, only = ids("conflicts"), ids("only")
+    if any(name in data and ids(name) is None for name in ("conflicts", "only")) or (conflicts is None and only is None):
+        return {}
+    return {"conflicts": conflicts or [], "only": only}
+
+
 def catalogue(modules, leagues, mods=None):
     systems = {}
     for file in manifests(modules, "module.json"):
         data = read_json(file)
         identifier = data.get("id", file.parent.name)
         require(isinstance(identifier, str) and identifier == file.parent.name and identifier.casefold() not in systems, "Invalid or duplicate module ID.")
-        systems[identifier.casefold()] = {"path": file.parent.relative_to(modules).as_posix(), "depends": data.get("depends", [])}
+        systems[identifier.casefold()] = {"path": file.parent.relative_to(modules).as_posix(), "depends": data.get("depends", []), **limits(data)}
         require(isinstance(systems[identifier.casefold()]["depends"], list)
                 and all(isinstance(d, str) for d in systems[identifier.casefold()]["depends"]), "Invalid module dependencies.")
     # A mod of the leagues that list it is listed by its id. One with a module's id does not load (the module runs), nor
@@ -310,15 +322,30 @@ def isolated(profile, profiles):
     return False
 
 
-def validate_modules(profile, selected, systems, profiles, new=False, listed=(), on=()):
+def mod_limits(mods, systems):
+    """Every mod that is on, by id, with what its mod.json declares (limits): as LocalExile reads them, of each mod that is on
+    but one with a module's id, whether it is a mod of the leagues that list it or of every league."""
+    result = {}
+    for identifier, folder, _ in on_mods(mods):
+        if identifier.casefold() not in systems or systems[identifier.casefold()].get("mod"):
+            try:
+                result[identifier.casefold()] = limits(read_json(folder / "mod.json"))
+            except (AccountError, ValueError, OSError):
+                result[identifier.casefold()] = {}
+    return result
+
+
+def validate_modules(profile, selected, systems, profiles, new=False, listed=(), on=None):
     """Whether these modules can run together for the league, by what LocalExile itself asks: the game, each module's own
     dependencies, and nothing made for an isolated league in one that leads to Standard. A module has no knowledge of
     leagues (LocalExile's modules.md), so any other module goes with any league, but the rules of a game mode, which go
     with that mode's leagues and with a league made in Waypoint on a base that has the mode. A league's own bundle (Ruthless in a
     Ruthless league) can be left out too: LocalExile loads the league without it and keeps its saved data, and the
     interface asks its user first. `new`: the modules are for a league made from this one, which is isolated whatever
-    its template is. `listed`: what the league lists now, which may name a module that is not installed."""
+    its template is. `listed`: what the league lists now, which may name a module that is not installed. `on`: the mods that
+    are on, by id, with their limits (mod_limits)."""
     require(playable(profile), "Ended or non-playable league definitions are read-only.")
+    on = on or {}
 
     def installed(path):
         identifier = path.rsplit("/", 1)[-1].casefold()
@@ -329,10 +356,21 @@ def validate_modules(profile, selected, systems, profiles, new=False, listed=(),
     known = {p.casefold() for p in listed}
     # A mod of every league that is on (`on`) is not missing either: LocalExile runs it.
     require(all(installed(p) or p.casefold() in known or p.rsplit("/", 1)[-1].casefold() in on for p in selected), "A selected module is missing.")
+    # What LocalExile asks of the whole list (its ModFolders.Clash): nothing beside one it conflicts with, and beside one
+    # that names the only ones it allows ("only"), nothing else but the game.
+    ids = [p.rsplit("/", 1)[-1] for p in selected]
+    for identifier in ids:
+        module = identifier.casefold() in systems and not systems[identifier.casefold()].get("mod")
+        own = systems[identifier.casefold()] if module else on.get(identifier.casefold(), {})
+        other = next((c for c in own.get("conflicts", []) if c.casefold() in {i.casefold() for i in ids}), None)
+        require(other is None, f"{identifier} cannot run with {other}.")
+        allowed = None if own.get("only") is None else {o.casefold() for o in own["only"]} | {identifier.casefold(), "game"}
+        extra = next((i for i in ids if allowed is not None and i.casefold() not in allowed), None)
+        require(extra is None, f"{identifier} allows only the modules and mods it names, not {extra}.")
     active = {path.rsplit("/", 1)[-1].casefold(): path for path in selected if installed(path)}
     require("game" in active, "The Game module is required.")
-    # A module LocalExile ships only in isolated leagues (the Survivors modules: a run starts by itself, refuses ordinary
-    # exits and hands out rewards) stays in isolated leagues.
+    # A module or mod LocalExile ships only in isolated leagues (Survivors': a run starts by itself, refuses ordinary exits
+    # and hands out rewards) stays in isolated leagues.
     if not new and not isolated(profile, profiles):
         for path in active.values():
             users = [p for p in profiles if not p["custom"] and path.casefold() in {m.casefold() for m in p["modules"]}]
@@ -533,7 +571,7 @@ def run(modules, leagues, choices, database, history, action, request, apply=Fal
     expected = request.get("review")
     require(isinstance(expected, dict) and expected == review(modules, leagues, choices, mods), "League or module definitions changed. Refresh and review the draft before saving.")
     systems, profiles = catalogue(modules, leagues, mods)
-    on = {identifier.casefold() for identifier, _, _ in on_mods(mods)}
+    on = mod_limits(mods, systems)
     current = read_json(choices) if choices.exists() else {}
     if action == "SetLeagueVisibility":
         visible = request.get("visible")

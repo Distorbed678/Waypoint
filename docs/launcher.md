@@ -1227,8 +1227,8 @@ under **Unavailable modules**.
 **Which modules a league can have** follows LocalExile's own rules, in the interface (`GameSystems.ValidateComposition`)
 and again in the adapter (`LeagueData.py`, `validate_modules`). LocalExile says that a module has no knowledge of leagues
 and that any league can list it, so an installed module is a box to tick for every league that can be edited: a core
-module the league does not ship with (the Currency Exchange in an SSF or a Ruthless league), another league's module
-(the Phrecia ascendancies), and an add-on. What stays:
+module the league does not ship with (the Currency Exchange in an SSF or a Ruthless league), another league's mod (the
+Phrecia ascendancies), and an add-on. What stays:
 
 - **The game and dependencies.** `Core/Game` cannot be removed, and what a module needs has to be on, as LocalExile itself
   requires.
@@ -1241,7 +1241,7 @@ module the league does not ship with (the Currency Exchange in an SSF or a Ruthl
   apart: it gets the same warning and can be unticked. Only the game is **Required** and locked.
 - **A module made for an isolated league stays in isolated leagues** (`IsolatedModule`, `Isolated`). A league is isolated
   when its parents lead to Void, so nothing of it reaches Standard: Survivors is one, and so is every league made in
-  Waypoint. A module LocalExile ships only in such leagues (the three Survivors modules: a run starts by itself, refuses
+  Waypoint. A module or mod LocalExile ships only in such leagues (the survivors mod: a run starts by itself, refuses
   ordinary exits and hands out rewards) shows as **For isolated leagues only** in a league that leads to Standard.
 - **The rules of a game mode go with that mode** (`ModeOf`, `ModeFits`, `RulesOnly`). A module that LocalExile ships
   only in leagues of one `form` is that mode's rules: the Ruthless module, which the eight leagues of the form
@@ -1251,8 +1251,8 @@ module the league does not ship with (the Currency Exchange in an SSF or a Ruthl
   rest of the mode does not come with it: the mode's own versions of skills, vendors and quest rewards belong to the
   league's definition (`dataSet`), and the game shows the league by its `form`. So:
   - in a league of that mode it is the league's own bundle, as above;
-  - the leagues LocalExile ships in another mode (Standard, Allflame, Phrecia, Survivors and their Hardcore and SSF
-    versions) do not get it: they have their own versions in that mode. It shows under **Unavailable modules** as
+  - the leagues LocalExile ships in another mode (Standard, Allflame and their Hardcore and SSF versions, and the leagues
+    a mod brings, such as Phrecia and Survivors) do not get it: they have their own versions in that mode. It shows under **Unavailable modules** as
     **Rules of a game mode**, and its tooltip names the flags a new league can start from to have it (`ModeStarts`);
   - a league made in Waypoint can have it when the game base it was made on has that mode: one that starts from
     Standard, Allflame or Phrecia, not one that starts from Survivors, whose own base has no league of that mode. Once
@@ -1263,9 +1263,9 @@ module the league does not ship with (the Currency Exchange in an SSF or a Ruthl
     league's bundle: unticking it takes it back without a question;
   - one that is already on where it does not fit (a hand edit of `data/league-modules.json`) stays ticked until its
     user unticks it, and other changes still save. It cannot be turned on anew there.
-- **An add-on** is a module that no league LocalExile ships lists (`GameSystems.AddOn`: PlayerBots and
-  NessaDevelopmentTabs, at the time of writing), off until its user lists it in the league they want it in, which is how
-  LocalExile's own guide turns PlayerBots on (`{"Standard": {"add": ["PlayerBots"]}}` in `data/league-modules.json`).
+- **An add-on** is a module or league's mod that no league LocalExile ships lists (`GameSystems.AddOn`: the playerbots
+  and nessadevelopmenttabs mods, at the time of writing), off until its user lists it in the league they want it in, which
+  is how such a mod is turned on (`{"Standard": {"add": ["playerbots"]}}` in `data/league-modules.json`).
   Saving writes that same entry. An add-on is never part of a bundle, in a league made in Waypoint that lists it either.
 - **A league's mod** (an installed mod that is on and whose `mod.json` says `"leagues": "listed"`; LocalExile's mod
   guide, "Leagues") is a row of the list like a module, with a **Mod** badge: ticked where a league lists it, in its
@@ -1284,6 +1284,14 @@ module the league does not ship with (the Currency Exchange in an SSF or a Ruthl
   All of this needs a LocalExile that has listed mods (its catalog's `ModFolders.On`; a release above 0.6.0); with an
   older one, or `Game_MODS=0`, Waypoint reads no mod here.
 - A league's mod may depend on a mod of every league that is on.
+- **What a module or mod declares** about the company it keeps (`conflicts` and `only` in its `module.json` or
+  `mod.json`, LocalExile's `ModFolders.Limits` and `Clash`) holds for the whole list: nothing beside one it conflicts with,
+  and beside one whose `only` names the ones it allows (the survivors mod: Cosmetics, Chat and Commands), nothing else but
+  the game. Ticking one that breaks it shows why under the list and does not save, as LocalExile would not load the league
+  (a new one) or would skip the change (the user's choices); a saved change that breaks one shows as LocalExile runs it,
+  the league's own list. Every module and every mod that is on declares them, a mod of every league too, but a mod with a
+  module's id. The keys are read as written, in lower case, and a `conflicts` or `only` that is not a list of ids declares
+  nothing, as LocalExile reads them.
 - **A listed module that is not installed** (a typo in a hand edit, a module taken away since) shows as
   **{path} (not installed)**, ticked. LocalExile skips it and loads the league, so the league stays editable; unticking
   the entry takes it off the list. It is never required, and a new one that is not installed is refused. Save, discard and validation feedback stay visible below the scrolling panel. Details, the card
@@ -1339,7 +1347,7 @@ files keep their existing behavior.
 
 Drafts review the complete relevant manifest/source inventory and user overrides. Adding, removing or changing a definition
 invalidates the draft; the backend checks again after backup. These checks enforce the declared structure, not every hidden
-assumption in arbitrary module code. LocalExile currently has no complete conflicts/supported-modes metadata contract.
+assumption in arbitrary module code. What a module or mod declares (`conflicts`, `only`) is read as LocalExile reads it.
 Waypoint adds two rules to LocalExile's, the modules of isolated leagues and the rules of a game mode, and two warnings,
 about a league's own bundle and about a mode's rules without the rest of the mode; a declaration from LocalExile or the
 modules of what belongs together would replace them. One thing no file says: two modules that both supply league rules

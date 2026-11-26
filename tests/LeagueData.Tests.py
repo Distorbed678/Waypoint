@@ -206,7 +206,7 @@ class LeagueDataTests(unittest.TestCase):
         self.run_request(self.choose("Survivors", ["Extra/X"]), action="SaveLeagueModules")
 
     def test_a_module_no_shipped_league_lists_is_an_add_on_that_is_never_required(self):
-        # Extra/X is in no league's list: an add-on, as PlayerBots is. LocalExile's own guide turns it on this way.
+        # Extra/X is in no league's list: an add-on, as the playerbots mod is. Its README turns it on this way.
         shipped = (self.leagues / "Standard/modules.json").read_text(encoding="utf-8")
         self.run_request(self.choose("Standard", ["Extra/X"]), action="SaveLeagueModules")
         self.assertEqual(data.read_json(self.choices)["Standard"]["add"], ["Extra/X"])
@@ -478,6 +478,45 @@ class LeagueDataTests(unittest.TestCase):
             self.run_request(request, action="SetLeagueVisibility")
         with self.assertRaises(data.AccountError):
             self.run_request(self.visibility("Survivors", True), action="SetLeagueVisibility")
+
+    def test_what_a_module_or_mod_declares_holds_for_the_whole_list(self):
+        self.standard_as_shipped()
+        mods = self.root / "Mods/Binaries"
+        # As LocalExile's ModFolders reads them: a module's "conflicts", a mod's "only", and one that is no list.
+        self.write(self.modules / "Extra/X/module.json", {"id": "X", "depends": ["Game"], "conflicts": ["Y"]})
+        self.write(self.modules / "Extra/Y/module.json", {"id": "Y", "depends": ["Game"], "only": "X"})
+        self.write(mods / "solo/mod.json", {"leagues": "listed", "only": ["Vendors"]})
+        # The keys exactly, as LocalExile reads them; and a mod of every league declares them as well.
+        self.write(mods / "loud/mod.json", {"leagues": "listed", "Only": ["Vendors"]})
+        self.write(mods / "every/mod.json", {"only": ["Vendors"]})
+        systems, _ = data.catalogue(self.modules, self.leagues, mods)
+        on = data.mod_limits(mods, systems)
+        self.assertEqual((systems["x"]["conflicts"], on["solo"]["only"], on["every"]["only"], "only" in systems["y"], on["loud"]),
+                         (["Y"], ["Vendors"], ["Vendors"], False, {}))
+
+        def choose(league, add=(), remove=()):
+            current = data.read_json(self.choices) if self.choices.exists() else {}
+            return {"league": league, "review": data.review(self.modules, self.leagues, self.choices, mods),
+                    "choices": {**current, league: {"add": list(add), "remove": list(remove)}}}
+
+        def run(request, action="SaveLeagueModules"):
+            data.run(self.modules, self.leagues, self.choices, self.database, self.history, action, request, True, mods=mods)
+
+        run(choose("Standard", ["Extra/X"]))
+        with self.assertRaisesRegex(data.AccountError, "X cannot run with Y"):
+            run(choose("Standard", ["Extra/X", "Extra/Y"]))
+        # Beside one that names the only ones it allows, nothing else but the game, in a new league too.
+        with self.assertRaisesRegex(data.AccountError, "solo allows only the modules and mods it names, not Harvest"):
+            run(choose("Standard", ["solo"]))
+        run(choose("Standard", ["solo"], remove=["Core/Harvest"]))
+        request = {"template": "Standard", "name": "My Solo", "description": "Mine.", "modules": ["Core/Game", "Core/Harvest", "solo"],
+                   "review": data.review(self.modules, self.leagues, self.choices, mods)}
+        with self.assertRaisesRegex(data.AccountError, "not Harvest"):
+            run(request, "CreateLeague")
+        # An "only" that is no list, or under another key's case, declares nothing.
+        run(choose("Hardcore", ["Extra/Y", "Core/Harvest", "loud"]))
+        with self.assertRaisesRegex(data.AccountError, "every allows only the modules and mods it names, not Harvest"):
+            run(choose("Standard", ["every"]))
 
     def test_a_leagues_mod_is_listed_like_a_module_and_a_mods_league_is_a_league(self):
         self.standard_as_shipped()
