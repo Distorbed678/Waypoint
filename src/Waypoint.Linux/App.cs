@@ -30,6 +30,7 @@ sealed class App : Avalonia.Application
         Settings = Settings.Load();
         _saved = Settings.ServerPath;
         DepotTool.Bundled ??= () => typeof(App).Assembly.GetManifestResourceStream("Bundled/DepotDownloader.zip");
+        Theme.Apply(Settings.Appearance);
         // Waypoint's own log, from the first moment: the setup guide runs before there is a checkout.
         SessionLog.Open(SupportReport.LogFolder, $"Waypoint {Updates.Current} · {Environment.OSVersion} · .NET {Environment.Version}");
         // The player's folders and tools, before anything reads a folder or starts a tool.
