@@ -7471,6 +7471,9 @@ Last reported Gateway event. Open Gateway output for details.</value>
   <data name="Text_c83931177471" xml:space="preserve">
     <value>This is not an item: copy one with Ctrl+C in Path of Building or in the game.</value>
   </data>
+  <data name="Text_c86ca7b723e9" xml:space="preserve">
+    <value>A mod that runs in every league. Untick it to take it off the list.</value>
+  </data>
   <data name="Text_c87d285421d0" xml:space="preserve">
     <value>The tested version could not be chosen (git exit {0}).</value>
   </data>

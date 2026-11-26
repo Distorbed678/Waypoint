@@ -455,9 +455,11 @@ public sealed partial class GameSystemsTab : UserControl
             // A listed module that is not installed (a typo in a hand edit, a module taken away since). LocalExile skips it
             // and loads the league, so the league stays editable. The entry stays ticked until its user unticks it: a
             // missing installation never removes a saved module by itself.
-            bool own = league.Mods.Contains(path.Split('/')[^1], StringComparer.OrdinalIgnoreCase);
-            string label = own ? L.Text("{0} (mod not on)", path) : L.Text("{0} (not installed)", path);
-            string help = own ? L.Text("This league needs this mod. LocalExile does not load the league while the mod is not installed or is turned off. Untick it to take it off the list.")
+            string id = path.Split('/')[^1];
+            bool on = _catalog.ModOn(id), own = !on && league.Mods.Contains(id, StringComparer.OrdinalIgnoreCase);
+            string label = on ? path : own ? L.Text("{0} (mod not on)", path) : L.Text("{0} (not installed)", path);
+            string help = on ? L.Text("A mod that runs in every league. Untick it to take it off the list.")
+                : own ? L.Text("This league needs this mod. LocalExile does not load the league while the mod is not installed or is turned off. Untick it to take it off the list.")
                 : L.Text("This league lists a module that is not installed. LocalExile skips it. Untick it to take it off the list.");
             var box = Named(new CheckBox { Content = Type(label, 13, false), IsChecked = true, IsEnabled = editable, HorizontalAlignment = HorizontalAlignment.Stretch }, label);
             _checks[path] = box;

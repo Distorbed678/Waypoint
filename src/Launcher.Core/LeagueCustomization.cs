@@ -47,7 +47,7 @@ public sealed partial class GameSystems
             foreach (string folder in Directory.GetDirectories(environment.Mods).OrderBy(f => Path.GetFileName(f), StringComparer.Ordinal).Take(512))
             {
                 string id = Path.GetFileName(folder), file = Path.Combine(folder, "mod.json");
-                if (!ModCatalog.ValidId(id) || !File.Exists(file) || !ModCatalog.Physical(folder)) continue;
+                if (!Readable(folder)) continue;
                 Add("mod/", environment.Mods, file);
                 // A redirected or too deep Leagues/ is not read (GameSystems skips it): not inventoried either.
                 try { AddLeagues(Path.Combine(folder, "Leagues"), id); }
@@ -159,7 +159,7 @@ public sealed partial class GameSystems
             throw new InvalidOperationException(ModeNote(ofMode));
         // A listed module that is not installed: LocalExile logs it and loads the league without it. One this league
         // already lists stays until its user unticks it; one that is new here is refused.
-        if (paths.Any(p => !Installed(p) && (forNewLeague || !league.Systems.Contains(p, StringComparer.OrdinalIgnoreCase))))
+        if (paths.Any(p => !Installed(p) && !_onMods.Contains(Id(p)) && (forNewLeague || !league.Systems.Contains(p, StringComparer.OrdinalIgnoreCase))))
             throw new InvalidOperationException(L.Text("A selected module is missing."));
         var active = paths.Where(Installed).Select(p => Systems.Single(s => s.Path.Equals(p, StringComparison.OrdinalIgnoreCase))).ToArray();
         if (!active.Any(s => s.Id.Equals("Game", StringComparison.OrdinalIgnoreCase)))
@@ -172,7 +172,7 @@ public sealed partial class GameSystems
             foreach (string id in module.Depends)
             {
                 // A mod of every league that is on: LocalExile loads it in every league.
-                if (_onMods.Contains(id) && !Systems.Any(s => s.Id.Equals(id, StringComparison.OrdinalIgnoreCase))) continue;
+                if (module.Mod && _onMods.Contains(id) && !Systems.Any(s => s.Id.Equals(id, StringComparison.OrdinalIgnoreCase))) continue;
                 Visit(active.FirstOrDefault(s => s.Id.Equals(id, StringComparison.OrdinalIgnoreCase))
                     ?? throw new InvalidOperationException(L.Text("{0} needs {1}. Enable the required module first.", module.Name, id)));
             }

@@ -85,7 +85,8 @@ def mod_folders(mods):
     if mods is None or not physical(mods).is_dir():
         return []
     folders = sorted((f for f in mods.iterdir() if f.is_dir()), key=lambda f: f.name)[:512]
-    return [f for f in folders if re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,127}", f.name) and (f / "mod.json").is_file() and is_physical(f)]
+    return [f for f in folders if re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,127}", f.name) and (f / "mod.json").is_file() and is_physical(f)
+            and is_physical(f / "mod.json") and (f / "mod.json").stat().st_size <= 1024 * 1024]
 
 
 def is_physical(path):
@@ -139,11 +140,12 @@ def review(modules, leagues, choices, mods=None):
             source = physical(folder / "Source")
             if source.is_dir():
                 for file in source.iterdir():
+                    if file.is_dir():
+                        result["nested/" + prefix + folder.name] = "unsupported"
+                        continue
                     physical(file)
                     if file.is_file():
                         result["league/" + prefix + file.relative_to(root).as_posix()] = digest(file)
-                    elif file.is_dir():
-                        result["nested/" + prefix + folder.name] = "unsupported"
             require(len(result) <= 10000, "Content inventory is too large.")
 
     add_leagues(leagues)
@@ -210,14 +212,15 @@ def catalogue(modules, leagues, mods=None):
     folder_names = {child.name for root, _ in roots if root.is_dir() for child in root.iterdir() if child.is_dir()}
     for identifier, folder, data in active:
         if data.get("leagues") == "listed" and identifier.casefold() not in systems and identifier not in folder_names:
-            depends = [] if data.get("depends") is None else data["depends"]
+            # A present "depends" that is no list: LocalExile's ModHost does not load the mod.
+            depends = data.get("depends", [])
             if isinstance(depends, list) and all(isinstance(d, str) for d in depends):
                 systems[identifier.casefold()] = {"path": identifier, "depends": depends, "mod": True}
     profiles = []
     names = set()
 
     def profile_of(file, mod):
-        data = read_json(file)
+        data = {key: value for key, value in read_json(file).items() if value is not None}
         name = data.get("name", file.parent.name)
         # A mod's league of a name that is taken is not loaded: the first of a name stays.
         if mod and isinstance(name, str) and name.casefold() in names:
@@ -225,12 +228,14 @@ def catalogue(modules, leagues, mods=None):
         require(isinstance(name, str) and name.casefold() not in names and (not mod or valid_league_folder(file.parent.name)), "Invalid or duplicate league.")
         for key in ("ssf", "hardcore", "ended", "creatable"):
             require(key not in data or isinstance(data[key], bool), "Invalid league flag.")
-        for key in ("base", "form", "dataSet", "parent", "entryOf", "entryKind", "deathLeague"):
+        for key in ("base", "form", "dataSet", "parent", "entryOf", "entryKind", "description"):
             require(data.get(key) is None or isinstance(data[key], str), "Invalid league field.")
-        # What it is made of: its modules, then the mods its league.json names.
-        listed = read_json(file.parent / "modules.json").get("modules", [])
-        listed = [canon(p, systems) for p in (mod_list(listed) if mod else paths(listed))]
+        # What it is made of: its modules, then the mods its league.json names (ids, as LocalExile reads them).
+        listing = read_json(file.parent / "modules.json")
+        require("modules" not in listing or isinstance(listing["modules"], list), "Invalid module list.")
+        listed = [canon(p, systems) for p in (mod_list(listing.get("modules")) if mod else paths(listing.get("modules", [])))]
         own = mod_list(data.get("mods"))
+        require(all("/" not in m and "\\" not in m for m in own), "Invalid module list.")
         ids = {p.rsplit("/", 1)[-1].casefold() for p in listed}
         listed += [canon(p, systems) for p in own if p.rsplit("/", 1)[-1].casefold() not in ids]
         names.add(name.casefold())
@@ -322,7 +327,8 @@ def validate_modules(profile, selected, systems, profiles, new=False, listed=(),
     # A listed module that is not installed: LocalExile logs it and loads the league without it. One the league already
     # lists stays until its user unticks it; one that is new here is refused.
     known = {p.casefold() for p in listed}
-    require(all(installed(p) or p.casefold() in known for p in selected), "A selected module is missing.")
+    # A mod of every league that is on (`on`) is not missing either: LocalExile runs it.
+    require(all(installed(p) or p.casefold() in known or p.rsplit("/", 1)[-1].casefold() in on for p in selected), "A selected module is missing.")
     active = {path.rsplit("/", 1)[-1].casefold(): path for path in selected if installed(path)}
     require("game" in active, "The Game module is required.")
     # A module LocalExile ships only in isolated leagues (the Survivors modules: a run starts by itself, refuses ordinary
@@ -357,7 +363,7 @@ def validate_modules(profile, selected, systems, profiles, new=False, listed=(),
         visiting.add(identifier)
         for dependency in systems[identifier]["depends"]:
             # A mod of every league that is on (`on`): LocalExile loads it in every league.
-            if dependency.casefold() in on and dependency.casefold() not in systems:
+            if systems[identifier].get("mod") and dependency.casefold() in on and dependency.casefold() not in systems:
                 continue
             require(dependency.casefold() in active, identifier + " needs " + dependency + ".")
             visit(dependency.casefold())
@@ -403,7 +409,7 @@ def empty_template(folder):
     files = list(source.iterdir())
     if len(files) != 1 or files[0].suffix != ".cs" or not physical(files[0]).is_file() or files[0].stat().st_size > 16384:
         return False
-    text = re.sub(r"/\*[\s\S]*?\*/|//[^\r\n]*", "", files[0].read_text(encoding="utf-8-sig"))
+    text = re.sub(r"/\*[\s\S]*?\*/|//[^\r\n]*", "", decode(files[0].read_bytes()))
     return re.fullmatch(r"\s*public\s+sealed\s+class\s+[A-Za-z_][A-Za-z0-9_]*\s*:\s*League\s*\{\s*\}\s*", text) is not None
 
 
@@ -587,7 +593,7 @@ def run(modules, leagues, choices, database, history, action, request, apply=Fal
     require(not destination.exists() and all(p["name"].casefold() != name.casefold() and p["folder"].name.casefold() != name.casefold() for p in profiles)
             and all(k.casefold() != name.casefold() for k in current)
             # An installed mod's id: LocalExile would refuse that mod.
-            and not (mods is not None and (mods / name).exists()), "That league name is already in use.")
+            and not (mods is not None and (mods / name).is_dir()), "That league name is already in use.")
     require(any(p["name"] == "Void" and not p["data"].get("parent") and not p["data"].get("creatable", True)
                 and all(path.casefold() == "core/game" for path in p["modules"])
                 and ((p["folder"] / "Source").is_dir() or (p["folder"] / "Binaries/league.dll").is_file()) for p in profiles), "The Void destination is missing or not isolated.")
@@ -619,7 +625,7 @@ def run(modules, leagues, choices, database, history, action, request, apply=Fal
                  destination / ".waypoint-league.json": json.dumps({"version": 1, "template": template["name"]})}
         settings = template["folder"] / "settings.json"
         if settings.exists():
-            files[destination / "settings.json"] = settings.read_text(encoding="utf-8-sig")
+            files[destination / "settings.json"] = decode(settings.read_bytes())
         for file, text in files.items():
             write_exclusive(file, text, created)
         manifest = destination / "league.json"

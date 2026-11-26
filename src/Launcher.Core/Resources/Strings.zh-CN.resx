@@ -7471,6 +7471,9 @@ Gateway 最近报告的事件。打开 Gateway 输出查看详情。</value>
   <data name="Text_c83931177471" xml:space="preserve">
     <value>这不是物品：请在 Path of Building 或游戏中用 Ctrl+C 复制一件物品。</value>
   </data>
+  <data name="Text_c86ca7b723e9" xml:space="preserve">
+    <value>在所有联赛中运行的模组。取消勾选即可将其从列表中移除。</value>
+  </data>
   <data name="Text_c87d285421d0" xml:space="preserve">
     <value>无法选择经过测试的版本（git 退出代码 {0}）。</value>
   </data>

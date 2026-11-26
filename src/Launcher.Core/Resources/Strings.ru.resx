@@ -7471,6 +7471,9 @@
   <data name="Text_c83931177471" xml:space="preserve">
     <value>Это не предмет: скопируйте его через Ctrl+C в Path of Building или в игре.</value>
   </data>
+  <data name="Text_c86ca7b723e9" xml:space="preserve">
+    <value>Мод, который работает во всех лигах. Снимите флажок, чтобы убрать его из списка.</value>
+  </data>
   <data name="Text_c87d285421d0" xml:space="preserve">
     <value>Не удалось выбрать проверенную версию (git завершился с кодом {0}).</value>
   </data>

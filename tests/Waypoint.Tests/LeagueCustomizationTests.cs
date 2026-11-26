@@ -520,9 +520,11 @@ public sealed class LeagueCustomizationTests : IDisposable
         Write("Mods/Binaries/idols/Leagues/NoSource/league.json", """{"name":"NoSource"}""");
         Write("Mods/Binaries/idols/Leagues/NoSource/modules.json", """{"modules":["Core/Game"]}""");
         Write("Mods/Binaries/idols/Leagues/Deep/Inner/league.json", """{"name":"Deep"}""");
-        // In UTF-16, a key in two cases (the first counts), "depends": null.
+        // In UTF-16, a key in two cases (the first counts).
         Directory.CreateDirectory(Path.Combine(_root, "Mods/Binaries/every"));
-        File.WriteAllText(Path.Combine(_root, "Mods/Binaries/every/mod.json"), """{"leagues":"listed","LEAGUES":"all","depends":null}""", System.Text.Encoding.Unicode);
+        File.WriteAllText(Path.Combine(_root, "Mods/Binaries/every/mod.json"), """{"leagues":"listed","LEAGUES":"all"}""", System.Text.Encoding.Unicode);
+        // "depends": null: LocalExile does not load the mod.
+        Mod("nulldeps", """{"leagues":"listed","depends":null}""");
         // depends that is no list: that mod is not loaded, and nothing else fails.
         Mod("odd", """{"leagues":"listed","depends":"Game"}""");
         // A mod of every league, a league mod that depends on it, and one named exactly as a league's folder.

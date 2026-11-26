@@ -522,8 +522,8 @@ class LeagueDataTests(unittest.TestCase):
         run(choose("Standard", ["Custom/Bots", "idols"]))
         self.assertEqual(data.read_json(self.choices)["Standard"]["add"], ["Custom/Bots", "idols"])
         run(choose("Phrecia", remove=["IDOLS"]))
-        with self.assertRaisesRegex(data.AccountError, "missing"):
-            run(choose("Standard", ["every"]))
+        # A mod of every league that is on is not missing (it runs anyway); one that is off is.
+        run(choose("Standard", ["every"]))
         with self.assertRaisesRegex(data.AccountError, "missing"):
             run(choose("Standard", ["stated"]))
         with self.assertRaisesRegex(data.AccountError, "bots needs Vendors"):
@@ -546,6 +546,9 @@ class LeagueDataTests(unittest.TestCase):
             run({**request, "name": "every", "review": data.review(self.modules, self.leagues, self.choices, mods)}, "CreateLeague")
         # What GameSystems reads the same way: a mod.json in UTF-16, a key in two cases (the first counts), "depends": null.
         (mods / "every/mod.json").write_bytes('{"leagues": "listed", "LEAGUES": "all", "depends": null}'.encode("utf-16"))
+        systems, _ = data.catalogue(self.modules, self.leagues, mods)
+        self.assertNotIn("every", systems)
+        (mods / "every/mod.json").write_bytes('{"leagues": "listed", "LEAGUES": "all"}'.encode("utf-16"))
         systems, _ = data.catalogue(self.modules, self.leagues, mods)
         self.assertEqual(systems["every"], {"path": "every", "depends": [], "mod": True})
         # A league mod that depends on a mod of every league can be ticked.
