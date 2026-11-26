@@ -182,9 +182,27 @@ static class Program
         // Until the folder exists its path reads as empty, and the settings would land in the working directory: a machine
         // with no ~/.local/share would never remember its checkout.
         _ = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData, Environment.SpecialFolderOption.Create);
+        UserDotnet();
         if (args.Length > 0 && Directory.Exists(args[0])) Checkout = Path.GetFullPath(args[0]);
         if (args.Length >= 3 && args[1] == "--render") return Render(args[2], args.Length > 3 ? args[3] : null, args.Length > 4 ? int.Parse(args[4], System.Globalization.CultureInfo.InvariantCulture) : 3);
         return AppBuilder.Configure<App>().UsePlatformDetect().WithInterFont().LogToTrace().StartWithClassicDesktopLifetime(args);
+    }
+
+    /// <summary>
+    /// Started from a desktop entry (the AppImage's menu entry, a file manager), Waypoint has no shell profile behind it: the
+    /// .NET SDK in ~/.dotnet and the tools `dotnet tool install --global` puts in ~/.dotnet/tools (PowerShell 7) are not on
+    /// PATH, and that pwsh cannot find its runtime without DOTNET_ROOT. Both are added for what Waypoint starts, after
+    /// everything PATH already has, and only when they are there; a DOTNET_ROOT that is set stays.
+    /// </summary>
+    static void UserDotnet()
+    {
+        string dotnet = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".dotnet");
+        if (!File.Exists(Path.Combine(dotnet, "dotnet"))) return;
+        if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DOTNET_ROOT"))) Environment.SetEnvironmentVariable("DOTNET_ROOT", dotnet);
+        var path = (Environment.GetEnvironmentVariable("PATH") ?? "").Split(':', StringSplitOptions.RemoveEmptyEntries).ToList();
+        foreach (string folder in new[] { dotnet, Path.Combine(dotnet, "tools") })
+            if (Directory.Exists(folder) && !path.Contains(folder)) path.Add(folder);
+        Environment.SetEnvironmentVariable("PATH", string.Join(':', path));
     }
 
     /// <summary>The window, or one section by its type (`Waypoint &lt;checkout&gt; --render out.png PlayTab`), as a picture with no
