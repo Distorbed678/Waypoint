@@ -4020,6 +4020,9 @@ Switching to it builds and runs that code on this computer with your rights, liv
   <data name="Text_695421b8f03a" xml:space="preserve">
     <value>LocalExile gets its own in {0}, starting from a copy of your normal settings without your login, with Networking Mode set to Predictive. Your normal game's files are not changed.</value>
   </data>
+  <data name="Text_695c4698b105" xml:space="preserve">
+    <value>only the published AppImage updates itself; download it from the release page</value>
+  </data>
   <data name="Text_6979ababfdcb" xml:space="preserve">
     <value>LocalExile keeps its own graphics, keys and saved login in {0}, and starts with the network mode it needs. Your normal game's settings are only read, once, as a starting point.</value>
   </data>
@@ -5027,6 +5030,9 @@ Switching to it builds and runs that code on this computer with your rights, liv
   </data>
   <data name="Text_87675db83a32" xml:space="preserve">
     <value>Ingredients</value>
+  </data>
+  <data name="Text_8787fab8d301" xml:space="preserve">
+    <value>Only the published AppImage updates itself</value>
   </data>
   <data name="Text_8799981821ae" xml:space="preserve">
     <value>Name for Create, Copy or Rename:</value>

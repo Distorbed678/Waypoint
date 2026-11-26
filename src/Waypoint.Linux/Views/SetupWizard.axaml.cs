@@ -477,7 +477,7 @@ public partial class SetupWizard : Window
         CheckoutStatus.Text = L.Text("Looking for LocalExile on this PC…");
         try
         {
-            var roots = RepositoryDiscovery.DefaultRoots(AppContext.BaseDirectory, Environment.CurrentDirectory, _current ?? "");
+            var roots = RepositoryDiscovery.DefaultRoots(App.LaunchFolder, Environment.CurrentDirectory, _current ?? "");
             var result = await RepositoryLocator.FindAsync(roots, _closing.Token);
             foreach (var repository in result.Repositories)
                 if (!_checkouts.Any(c => c.Root.Equals(repository.Root, StringComparison.Ordinal))) _checkouts.Add(new(repository.Root, repository.Summary));

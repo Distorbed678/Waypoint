@@ -4020,6 +4020,9 @@
   <data name="Text_695421b8f03a" xml:space="preserve">
     <value>LocalExile получит собственные в {0}: это копия ваших обычных настроек без данных для входа, с режимом работы сети «Рассинхронизация». Файлы вашей обычной игры не изменятся.</value>
   </data>
+  <data name="Text_695c4698b105" xml:space="preserve">
+    <value>обновляется сам только опубликованный AppImage; скачайте его со страницы выпуска</value>
+  </data>
   <data name="Text_6979ababfdcb" xml:space="preserve">
     <value>LocalExile хранит свою графику, клавиши и сохранённый вход в {0} и сразу использует нужный режим работы сети. Настройки вашей обычной игры только читаются, один раз, как отправная точка.</value>
   </data>
@@ -5027,6 +5030,9 @@
   </data>
   <data name="Text_87675db83a32" xml:space="preserve">
     <value>Ингредиенты</value>
+  </data>
+  <data name="Text_8787fab8d301" xml:space="preserve">
+    <value>Сам обновляется только опубликованный AppImage</value>
   </data>
   <data name="Text_8799981821ae" xml:space="preserve">
     <value>Имя для «Создать», «Копировать» или «Переименовать»:</value>

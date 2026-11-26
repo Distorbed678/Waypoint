@@ -20,6 +20,11 @@
     <!-- An Update button under the mouse, and pressed: darker greens. -->
     <SolidColorBrush x:Key="Shell.UpdateHover" Color="#2F9A64" />
     <SolidColorBrush x:Key="Shell.UpdatePressed" Color="#257A4F" />
+    <!-- The update cards: the success colour over the page (ThemePalette's Shell.Update*). -->
+    <SolidColorBrush x:Key="Shell.UpdateBack" Color="#1B312C" />
+    <SolidColorBrush x:Key="Shell.UpdateBorder" Color="#2A6B4E" />
+    <SolidColorBrush x:Key="Shell.UpdateText" Color="#EEF0F6" />
+    <SolidColorBrush x:Key="Shell.UpdateAccent" Color="#297C53" />
     <SolidColorBrush x:Key="Shell.Warning" Color="#E5A93B" />
     <SolidColorBrush x:Key="Shell.Error" Color="#E5625E" />
     <SolidColorBrush x:Key="Shell.Idle" Color="#6C7385" />

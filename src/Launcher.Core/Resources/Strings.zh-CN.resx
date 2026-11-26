@@ -4020,6 +4020,9 @@
   <data name="Text_695421b8f03a" xml:space="preserve">
     <value>LocalExile 会在 {0} 中使用自己的设置：以你平时设置的副本为起点，不含你的登录信息，并将连线模式设为预测模式。你平时游戏的文件不会更改。</value>
   </data>
+  <data name="Text_695c4698b105" xml:space="preserve">
+    <value>只有发布的 AppImage 能自行更新；请从发布页面下载</value>
+  </data>
   <data name="Text_6979ababfdcb" xml:space="preserve">
     <value>LocalExile 会在 {0} 中保存自己的图形设置、按键设置和已保存的登录信息，并以所需的连线模式启动。你平时游戏的设置只会被读取一次，作为初始设置。</value>
   </data>
@@ -5027,6 +5030,9 @@
   </data>
   <data name="Text_87675db83a32" xml:space="preserve">
     <value>材料</value>
+  </data>
+  <data name="Text_8787fab8d301" xml:space="preserve">
+    <value>只有发布的 AppImage 能自行更新</value>
   </data>
   <data name="Text_8799981821ae" xml:space="preserve">
     <value>用于创建、复制或重命名的名称：</value>

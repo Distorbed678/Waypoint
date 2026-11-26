@@ -77,7 +77,7 @@ sealed class App : Avalonia.Application
     /// <summary>The folder picker until it gives a server checkout; null when the player cancels.</summary>
     internal static string? ChooseServer(Window owner)
     {
-        string start = Repo.Suggested(Path.TrimEndingDirectorySeparator(AppContext.BaseDirectory));
+        string start = Repo.Suggested(Path.TrimEndingDirectorySeparator(LaunchFolder));
         while (true)
         {
             if (Ui.PickFolder(owner, L.Text("LocalExile server checkout (the folder with GameServer.slnx)"), start) is not { } folder) return null;
@@ -138,12 +138,17 @@ sealed class App : Avalonia.Application
 
     static void StartAgain()
     {
-        if (Environment.ProcessPath is not { } exe) return;
+        // From an AppImage the process runs inside the image, which is gone once it exits: the AppImage itself starts again.
+        if ((Updates.RunningExe ?? Environment.ProcessPath) is not { } exe) return;
         var start = new ProcessStartInfo(exe) { UseShellExecute = false };
         // Started as `dotnet Waypoint.dll`, the process is dotnet.
         if (Path.GetFileNameWithoutExtension(exe) == "dotnet") start.ArgumentList.Add(typeof(App).Assembly.Location);
         Process.Start(start)?.Dispose();
     }
+
+    /// <summary>The folder Waypoint was started from: the AppImage's, not the image it runs in, which is only mounted while it
+    /// runs; else the program's own.</summary>
+    internal static string LaunchFolder => Updates.RunningExe is { } image ? Path.GetDirectoryName(image)! : AppContext.BaseDirectory;
 
     /// <summary>A colour of the theme by its name, as on Windows.</summary>
     public static IBrush Brush(string name) => Instance.TryGetResource(name, null, out var value) && value is IBrush brush ? brush : Brushes.Gray;
