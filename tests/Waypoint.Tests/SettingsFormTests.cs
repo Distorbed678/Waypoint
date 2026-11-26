@@ -76,6 +76,23 @@ public class SettingsFormTests : IDisposable
         Assert.Throws<InvalidDataException>(() => Load("[]"));
     }
     [Fact]
+    public void A_mod_that_was_a_module_shows_the_module_values_until_it_has_its_own()
+    {
+        // LocalExile moves data/modules/<Id>.json to data/mods/<id>.json at its first start, unless the new file exists.
+        Load();
+        Directory.CreateDirectory(Path.Combine(_root, "data", "modules"));
+        File.WriteAllText(Path.Combine(_root, "data", "modules", "Example.json"), """{"count":7}""");
+        ModSettingsForm Mod() => ModSettingsForm.Load("example", Path.Combine(_root, "settings.json"), _root);
+        var form = Mod();
+        Assert.Equal(7, form.Current(form.Settings.Single(s => s.Name == "count"))!.GetValue<int>());
+        Assert.Equal("missing", form.UserHash);
+        Directory.CreateDirectory(Path.Combine(_root, "data", "mods"));
+        File.WriteAllText(Path.Combine(_root, "data", "mods", "example.json"), """{"count":4}""");
+        form = Mod();
+        Assert.Equal(4, form.Current(form.Settings.Single(s => s.Name == "count"))!.GetValue<int>());
+        Assert.NotEqual("missing", form.UserHash);
+    }
+    [Fact]
     public void Percent_input_round_trips_with_steps_and_kind_paths_are_distinct()
     {
         var setting = Load().Settings.Single(s => s.Name == "rate");
