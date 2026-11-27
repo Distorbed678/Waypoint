@@ -37,7 +37,7 @@ sealed class AppearanceDialog : FormWindow
         var root = new DockPanel { Margin = new Thickness(20) };
         var footer = new StackPanel { Margin = new Thickness(0, 12, 0, 0) };
         DockPanel.SetDock(footer, Dock.Bottom);
-        _feedback.Foreground = AppTheme.Brush("Shell.Error");
+        BindBrush(_feedback, TextBlock.ForegroundProperty, "Shell.Error");
         footer.Children.Add(_feedback);
         footer.Children.Add(Preview());
         var actions = new WrapPanel { Margin = new Thickness(0, 12, 0, 0), ItemSpacing = 8 };
@@ -66,7 +66,7 @@ sealed class AppearanceDialog : FormWindow
         Heading(body, "Appearance");
         AddOptions(body, _modes, "Appearance", [("Light", "Light"), ("Dark", "Dark"), ("System", "System")], id => Change(Draft with { Mode = id }));
         _summary.Margin = new Thickness(0, 5, 0, 10);
-        _summary.Foreground = AppTheme.Brush("Shell.TextSecondary");
+        BindBrush(_summary, TextBlock.ForegroundProperty, "Shell.TextSecondary");
         body.Children.Add(_summary);
         Heading(body, "Color scheme");
         _schemes.ItemsPanel = WrapItems();
@@ -142,7 +142,7 @@ sealed class AppearanceDialog : FormWindow
             var row = new Grid { Margin = new Thickness(0, 4, 0, 4), ColumnDefinitions = new ColumnDefinitions("*,Auto") };
             row.Children.Add(new TextBlock { Text = L.Text(role.Label), VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 12, 0) });
             var content = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8 };
-            content.Children.Add(new Border { Background = new SolidColorBrush(colors[role.Key]), Width = 24, Height = 20, BorderThickness = new Thickness(1), BorderBrush = AppTheme.Brush("Shell.Border") });
+            content.Children.Add(BindBrush(new Border { Background = new SolidColorBrush(colors[role.Key]), Width = 24, Height = 20, BorderThickness = new Thickness(1) }, Border.BorderBrushProperty, "Shell.Border"));
             content.Children.Add(new TextBlock { Text = ThemePalette.Hex(colors[role.Key]), FontFamily = new FontFamily("monospace"), VerticalAlignment = VerticalAlignment.Center });
             var button = new Button { Content = content, Padding = new Thickness(10, 5, 10, 5) };
             AutomationProperties.SetName(button, L.Text("Change color: {0}", L.Text(role.Label)));
@@ -214,7 +214,8 @@ sealed class AppearanceDialog : FormWindow
 
     static void SetSelected(ListBox list, string id) => list.SelectedItem = list.Items.OfType<ListBoxItem>().FirstOrDefault(i => (string)i.Tag! == id);
     static FuncTemplate<Panel?> WrapItems() => new(() => new WrapPanel());
-    static TextBlock Caption(string text) => new() { Text = L.Text(text), Margin = new Thickness(0, 7, 0, 10), FontSize = 12, Foreground = AppTheme.Brush("Shell.TextSecondary"), TextWrapping = TextWrapping.Wrap };
+    internal static T BindBrush<T>(T control, AvaloniaProperty property, string key) where T : Control { control.Bind(property, control.GetResourceObservable(key)); return control; }
+    static TextBlock Caption(string text) => BindBrush(new TextBlock { Text = L.Text(text), Margin = new Thickness(0, 7, 0, 10), FontSize = 12, TextWrapping = TextWrapping.Wrap }, TextBlock.ForegroundProperty, "Shell.TextSecondary");
     static void Heading(Panel parent, string text) => parent.Children.Add(new TextBlock { Text = L.Text(text), FontWeight = FontWeight.SemiBold, FontSize = 18, Margin = new Thickness(0, 16, 0, 8) });
     static void Label(Panel parent, string text) => parent.Children.Add(new TextBlock { Text = L.Text(text), FontWeight = FontWeight.SemiBold, Margin = new Thickness(0, 12, 0, 2) });
 
@@ -247,7 +248,7 @@ sealed class ColorPickerDialog : FormWindow
     {
         _changed = changed;
         DialogLayout.Configure(this, owner, title, 460);
-        _swatch.BorderBrush = AppTheme.Brush("Shell.Border");
+        AppearanceDialog.BindBrush(_swatch, Border.BorderBrushProperty, "Shell.Border");
         var root = new StackPanel { Margin = new Thickness(20), Spacing = 10 };
         var top = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 12 };
         top.Children.Add(_swatch);

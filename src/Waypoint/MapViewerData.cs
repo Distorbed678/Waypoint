@@ -16,6 +16,31 @@ static class MapAreaSearch
             || a.Display.Equals(query.Trim(), StringComparison.OrdinalIgnoreCase))
             ?? candidates.FirstOrDefault(a => Matches(a.Id, a.Name, query));
     }
+
+    /// <summary>Runs of ASCII digits compare as numbers, everything else without case (as Windows' StrCmpLogicalW does).</summary>
+    public static int Natural(string a, string b)
+    {
+        int i = 0, j = 0;
+        while (i < a.Length && j < b.Length)
+        {
+            if (char.IsAsciiDigit(a[i]) && char.IsAsciiDigit(b[j]))
+            {
+                int si = i, sj = j;
+                while (i < a.Length && char.IsAsciiDigit(a[i])) i++;
+                while (j < b.Length && char.IsAsciiDigit(b[j])) j++;
+                string x = a[si..i].TrimStart('0'), y = b[sj..j].TrimStart('0');
+                int byLength = x.Length.CompareTo(y.Length);
+                if (byLength != 0) return byLength;
+                int byDigits = string.CompareOrdinal(x, y);
+                if (byDigits != 0) return byDigits;
+                continue;
+            }
+            int c = char.ToUpperInvariant(a[i]).CompareTo(char.ToUpperInvariant(b[j]));
+            if (c != 0) return c;
+            i++; j++;
+        }
+        return (a.Length - i).CompareTo(b.Length - j);
+    }
 }
 record MapListItem(string Label, string? Path, int? X, int? Y, MapMarkerKey? Marker = null);
 record MapRequest(string AreaId, string Seed, string Level);

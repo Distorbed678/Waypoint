@@ -223,31 +223,6 @@ sealed class MapAreaComparer(bool byName) : IComparer<MapArea>
     {
         if (left is null || right is null) return 0;
         int name = byName ? StringComparer.CurrentCultureIgnoreCase.Compare(left.Name, right.Name) : 0;
-        return name != 0 ? name : Natural(left.Id, right.Id);
-    }
-
-    /// <summary>Runs of digits compare as numbers, everything else without case.</summary>
-    internal static int Natural(string a, string b)
-    {
-        int i = 0, j = 0;
-        while (i < a.Length && j < b.Length)
-        {
-            if (char.IsAsciiDigit(a[i]) && char.IsAsciiDigit(b[j]))
-            {
-                int si = i, sj = j;
-                while (i < a.Length && char.IsAsciiDigit(a[i])) i++;
-                while (j < b.Length && char.IsAsciiDigit(b[j])) j++;
-                string x = a[si..i].TrimStart('0'), y = b[sj..j].TrimStart('0');
-                int byLength = x.Length.CompareTo(y.Length);
-                if (byLength != 0) return byLength;
-                int byDigits = string.CompareOrdinal(x, y);
-                if (byDigits != 0) return byDigits;
-                continue;
-            }
-            int c = char.ToUpperInvariant(a[i]).CompareTo(char.ToUpperInvariant(b[j]));
-            if (c != 0) return c;
-            i++; j++;
-        }
-        return (a.Length - i).CompareTo(b.Length - j);
+        return name != 0 ? name : MapAreaSearch.Natural(left.Id, right.Id);
     }
 }

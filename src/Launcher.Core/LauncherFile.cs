@@ -21,8 +21,8 @@ public static class LauncherFile
     {
         if (processPath is not { Length: > 0 }) return null;
         if (!linux) return Path.GetFileName(processPath).Equals(ExeName, StringComparison.OrdinalIgnoreCase) ? processPath : null;
-        if (appImage is not { Length: > 0 } || appDir is not { Length: > 0 } || !Path.IsPathFullyQualified(appImage) || !Path.IsPathFullyQualified(appDir)) return null;
-        string mount = Path.TrimEndingDirectorySeparator(appDir) + "/";
+        if (appImage is not { Length: > 0 } || appDir is not { Length: > 0 } || !appImage.StartsWith('/') || !appDir.StartsWith('/')) return null;
+        string mount = appDir.TrimEnd('/') + "/";
         if (!processPath.StartsWith(mount, StringComparison.Ordinal) || appImage.StartsWith(mount, StringComparison.Ordinal)) return null;
         return exists(appImage) ? appImage : null;
     }

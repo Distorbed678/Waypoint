@@ -40,6 +40,7 @@ public class LauncherFileTests
     [InlineData("/tmp/.mount_WaypoiAbcdef/usr/bin/Waypoint", "/home/player/Apps/Waypoint-x86_64.AppImage", "/tmp/.mount_WaypoiAbc")]
     // Relative paths are not the runtime's.
     [InlineData("/tmp/.mount_WaypoiAbc/usr/bin/Waypoint", "Waypoint-x86_64.AppImage", "/tmp/.mount_WaypoiAbc")]
+    [InlineData("/tmp/.mount_WaypoiAbc/usr/bin/Waypoint", "/home/player/Apps/Waypoint-x86_64.AppImage", "tmp/.mount_WaypoiAbc")]
     // The AppImage is not there any more.
     [InlineData("/tmp/.mount_WaypoiAbc/usr/bin/Waypoint", "/home/player/Apps/Gone.AppImage", "/tmp/.mount_WaypoiAbc")]
     // A file inside the image is never one to replace.

@@ -50,7 +50,7 @@ public partial class MainWindow : Window
     readonly StatusLight[] _lights =
     [
         new(Service.Patch, "Patch"), new(Service.Gateway, "Gateway"), new(Service.Auth, "Auth"), new(Service.Client, "Game"),
-        new(Service.DevHost, "Dev host", optional: true),
+        new(Service.DevHost, "Dev host", optional: true), new(Service.Recorder, "Walk maps", optional: true),
     ];
     readonly ControlTab Control = new();
     readonly PlayTab PlayView = new();
@@ -69,7 +69,7 @@ public partial class MainWindow : Window
     readonly ConsoleTab ConsoleView = new();
     readonly ToolsTab ToolsView = new();
     readonly SettingsTab SettingsView = new();
-    bool _closing, _deciding, _explicitExit;
+    bool _closing, _deciding, _explicitExit, _leaveRunning;
     /// <summary>The tray icon, while the window is hidden (none when only a picture is made).</summary>
     readonly Tray? _tray = Program.Rendering ? null : new();
     /// <summary>Whether the game ran at the last sample: null until the first one.</summary>
@@ -518,17 +518,19 @@ public partial class MainWindow : Window
     internal void ExitNow()
     {
         _explicitExit = true;
+        _leaveRunning = true;
         Close();
     }
 
-    /// <summary>As on Windows, without a tray to hide in: a run in progress keeps the window open, and running services are
-    /// stopped or left as the settings say, after asking when they say to ask.</summary>
+    /// <summary>As on Windows: a run in progress keeps the window open, closing hides to the tray when chosen and a tray is
+    /// available, and running services are stopped or left as the settings say, after asking when they say to ask.</summary>
     void WindowClosing(object? sender, WindowClosingEventArgs e)
     {
         if (_closing) return;
         if (_deciding) { e.Cancel = true; return; }
         bool explicitExit = _explicitExit;
-        _explicitExit = false;
+        bool leaveRunning = _leaveRunning;
+        _explicitExit = _leaveRunning = false;
         // Waypoint is stopping what runs before it leaves this folder, and closes by itself when that has ended. Nothing
         // is asked or said meanwhile: a question open when the wait ends would keep the window from closing.
         if (_shared.Leaving) { e.Cancel = true; return; }
@@ -555,7 +557,7 @@ public partial class MainWindow : Window
             Dispatcher.UIThread.Post(AskClose);
             return;
         }
-        if (stop && anything && !explicitExit)
+        if (stop && anything && !leaveRunning)
         {
             e.Cancel = true;
             Dispatcher.UIThread.Post(StopAndClose);
@@ -568,12 +570,13 @@ public partial class MainWindow : Window
     {
         _deciding = false;
         // Hiding to the tray is one of the answers only where the desktop shows a tray.
-        string[] answers = Tray.Available
+        bool tray = Tray.Available;
+        string[] answers = tray
             ? [L.Text("Hide to tray"), L.Text("Stop services and exit"), L.Text("Exit Waypoint"), L.Text("Cancel")]
             : [L.Text("Stop services and exit"), L.Text("Exit Waypoint"), L.Text("Cancel")];
         int chosen = Dialog.Show(this, DialogKind.Question, L.Text("When Waypoint exits"), L.Text("Close Waypoint completely."), null, answers);
-        if (Tray.Available) chosen--;
-        if (chosen == -1 && Tray.Available) HideToTray();
+        if (tray) chosen--;
+        if (chosen == -1 && tray) HideToTray();
         else if (chosen == 0) StopAndClose();
         else if (chosen == 1) { _closing = true; Close(); }
     }

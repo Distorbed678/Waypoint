@@ -220,7 +220,7 @@ partial class ControlTab : UserControl
         bool serverHotReload = Repo.HasServerHotReload();
         if (serverHotReload) s.HotReload = HotReload.IsChecked == true;
         s.Save();
-        return new LiveRequest(mode, server, s.Walkmaps, s.NoBuild, s.NoExtract, NoHotReload: serverHotReload && !s.HotReload);
+        return new LiveRequest(mode, server, RecordsUnderProton && s.Walkmaps, s.NoBuild, s.NoExtract, NoHotReload: serverHotReload && !s.HotReload);
     }
 
     bool ClientRunning => _shared.Monitor.Latest.Any(s => s.Service == Service.Client && s.Running);

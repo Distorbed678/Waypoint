@@ -19,15 +19,26 @@ sealed class Tray : IDisposable
 
     public event Action? ShowRequested, StopAllRequested, ExitRequested;
 
-    /// <summary>The desktop shows tray icons: a StatusNotifierWatcher has its name on the session bus. Asked once.</summary>
-    public static bool Available => Probe.Result;
+    /// <summary>The desktop shows tray icons: a StatusNotifierWatcher has its name on the session bus. Non-blocking: false
+    /// until the background probe answers, and always false while rendering headless.</summary>
+    public static bool Available => !Program.Rendering && _available;
 
-    /// <summary>The question to the session bus, asked off the UI thread as soon as Waypoint starts (<see cref="Ask"/>).</summary>
-    static Task<bool> Probe => _probe ??= Task.Run(WatcherRuns);
-    static Task<bool>? _probe;
+    /// <summary>Raised once when the background session-bus probe finishes.</summary>
+    public static event Action? Ready;
 
-    /// <summary>Starts the question early, so that the window never waits for the session bus.</summary>
-    public static void Ask() => _ = Probe;
+    static volatile bool _available;
+    static int _asked;
+
+    /// <summary>Starts the question early off the UI thread, so the window never waits for the session bus.</summary>
+    public static void Ask()
+    {
+        if (Program.Rendering || Interlocked.Exchange(ref _asked, 1) != 0) return;
+        _ = Task.Run(() =>
+        {
+            _available = WatcherRuns();
+            Ready?.Invoke();
+        });
+    }
 
     public Tray()
     {

@@ -36,6 +36,7 @@ partial class SettingsTab : UserControl
         }
         L.Current.PropertyChanged += (_, _) => Show();
         AppTheme.Changed += ShowAppearance;
+        Tray.Ready += () => Avalonia.Threading.Dispatcher.UIThread.Post(Show);
         L.Current.PropertyChanged += (_, _) => ShowPaths();
         Show();
         ShowPaths();
